@@ -23,6 +23,10 @@ def _weighted_choice(
     *,
     rng: RandomSource | None = None,
 ) -> "BigFiveConflictResolutionStyle":
+    if not weights:
+        raise ValueError("weights must be non-empty")
+    if any(weight < 0.0 for weight in weights.values()):
+        raise ValueError("weights must be non-negative")
     source = rng if rng is not None else random
     total = sum(weights.values())
     if total <= 0.0:
@@ -162,6 +166,21 @@ _STYLE_TO_CONCERNS: dict[
         PriorityLevel.MODERATE,
     ),
 }
+
+
+def _validate_style_concerns() -> None:
+    expected = set(BigFiveConflictResolutionStyle)
+    actual = set(_STYLE_TO_CONCERNS)
+    if expected != actual:
+        missing = {style.value for style in expected - actual}
+        extra = {style.value for style in actual - expected}
+        raise ValueError(
+            "Conflict resolution styles and concern mapping are out of sync. "
+            f"Missing: {sorted(missing)}. Extra: {sorted(extra)}."
+        )
+
+
+_validate_style_concerns()
 
 
 @dataclass(frozen=True, slots=True)
