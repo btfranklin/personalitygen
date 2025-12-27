@@ -5,10 +5,10 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:435fd32eba1f142c1341dc1b75fc563766ac132631d035c977f5272cfcc1a5e8"
+content_hash = "sha256:892ddc79250a20ceb8ddfbc3815d7e40ea6c8fa8e3e03a9d17e623d19cff130c"
 
 [[metadata.targets]]
-requires_python = ">=3.14"
+requires_python = ">=3.11"
 
 [[package]]
 name = "colorama"
