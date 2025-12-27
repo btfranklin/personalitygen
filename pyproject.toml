@@ -30,9 +30,6 @@ Repository = "https://github.com/btfranklin/personalitygen.git"
 
 dependencies = []
 
-[project.urls]
-Homepage = "https://github.com/btfranklin/PersonalityKit"
-
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
