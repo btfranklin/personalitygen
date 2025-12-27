@@ -1,5 +1,7 @@
 # personalitygen
 
+![personalitygen social preview](.github/social%20preview/personalitygen_social_preview.jpg)
+
 `personalitygen` generates and manages simulated human-like personalities based on the Big Five (OCEAN) model. It is designed for
 simulation, storytelling, and testing scenarios where you want plausible, varied personality profiles without running surveys.
 
