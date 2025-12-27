@@ -1,0 +1,37 @@
+[project]
+name = "personalitygen"
+version = "0.1.0"
+description = "Generate and manage simulated human-like personalities based on the Big Five model."
+readme = "README.md"
+requires-python = ">=3.14"
+license = {text = "MIT"}
+authors = [{name = "B.T. Franklin"}]
+keywords = ["personality", "big-five", "ocean", "simulation"]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/btfranklin/PersonalityKit"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+packages = [{include = "personalitygen", from = "src"}]
+
+[tool.pdm.build]
+excludes = ["tests/**"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "flake8>=7.3.0",
+]
+
+[tool.pdm.scripts]
+test = "pytest"
+lint = "flake8 src tests"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
