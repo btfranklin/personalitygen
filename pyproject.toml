@@ -5,7 +5,9 @@ description = "Generate and manage simulated human-like personalities based on t
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
-authors = [{name = "B.T. Franklin"}]
+authors = [
+    {name = "B.T. Franklin", email = "brandon.franklin@gmail.com"},
+]
 keywords = ["personality", "big-five", "ocean", "simulation"]
 dependencies = []
 classifiers = [
