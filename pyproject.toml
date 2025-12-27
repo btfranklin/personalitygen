@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "B.T. Franklin"}]
 keywords = ["personality", "big-five", "ocean", "simulation"]
+dependencies = []
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
@@ -27,8 +28,6 @@ Homepage = "https://github.com/btfranklin/personalitygen"
 Issues = "https://github.com/btfranklin/personalitygen/issues"
 Changelog = "https://github.com/btfranklin/personalitygen/releases"
 Repository = "https://github.com/btfranklin/personalitygen.git"
-
-dependencies = []
 
 [build-system]
 requires = ["pdm-backend"]
