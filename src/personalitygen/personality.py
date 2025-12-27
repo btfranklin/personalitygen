@@ -82,9 +82,11 @@ class BigFiveConflictResolutionStyle(str, Enum):
             + trait_configuration.conscientiousness.score * -0.2,
         }
 
-        # Negative weights are treated as zero (no chance of selection).
+        # Keep a small chance of selecting counter-indicated styles.
+        minimum_weight = 0.1
         weights = {
-            style: max(level, 0.0) for style, level in style_levels.items()
+            style: max(level, minimum_weight)
+            for style, level in style_levels.items()
         }
         return _weighted_choice(weights, rng=rng)
 

@@ -61,7 +61,7 @@ def test_personality_random_configuration() -> None:
     assert (conflict.concern_for_self, conflict.concern_for_others) == expected
 
 
-def test_conflict_style_clamps_negative_weights() -> None:
+def test_conflict_style_floors_negative_weights() -> None:
     # All maxed scores make DOMINATING negative and COMPROMISING zero.
     trait_configuration = BigFiveTraitConfiguration(
         openness=BigFiveOpenness(1.0, 1.0, 1.0),
@@ -70,26 +70,23 @@ def test_conflict_style_clamps_negative_weights() -> None:
         agreeableness=BigFiveAgreeableness(1.0, 1.0, 1.0),
         neuroticism=BigFiveNeuroticism(1.0, 1.0, 1.0),
     )
-    rng = SequenceRandom([0.1, 0.7, 1.1])
+    rng = SequenceRandom([1.25, 1.35])
 
-    # The only reachable styles are the ones with positive weights.
+    # Negative/zero levels are floored to allow rare counter-indicated picks.
     results = [
         BigFiveConflictResolutionStyle.random(
             trait_configuration, rng=rng
         )
-        for _ in range(3)
+        for _ in range(2)
     ]
     assert results == [
-        BigFiveConflictResolutionStyle.AVOIDING,
-        BigFiveConflictResolutionStyle.OBLIGING,
-        BigFiveConflictResolutionStyle.INTEGRATING,
+        BigFiveConflictResolutionStyle.DOMINATING,
+        BigFiveConflictResolutionStyle.COMPROMISING,
     ]
-    assert BigFiveConflictResolutionStyle.DOMINATING not in results
-    assert BigFiveConflictResolutionStyle.COMPROMISING not in results
 
 
-def test_conflict_style_falls_back_to_uniform_when_all_zero() -> None:
-    # Zeroed trait scores mean every style weight is zero.
+def test_conflict_style_is_uniform_when_all_zero() -> None:
+    # Zeroed trait scores mean every style weight hits the floor.
     trait_configuration = BigFiveTraitConfiguration(
         openness=BigFiveOpenness(0.0, 0.0, 0.0),
         conscientiousness=BigFiveConscientiousness(0.0, 0.0, 0.0),
@@ -97,9 +94,9 @@ def test_conflict_style_falls_back_to_uniform_when_all_zero() -> None:
         agreeableness=BigFiveAgreeableness(0.0, 0.0, 0.0),
         neuroticism=BigFiveNeuroticism(0.0, 0.0, 0.0),
     )
-    rng = SequenceRandom([0.1, 1.1, 2.1, 3.1, 4.1])
+    rng = SequenceRandom([0.05, 0.15, 0.25, 0.35, 0.45])
 
-    # Uniform fallback should step through the enum order predictably.
+    # Equal weights should step through the enum order predictably.
     results = [
         BigFiveConflictResolutionStyle.random(
             trait_configuration, rng=rng

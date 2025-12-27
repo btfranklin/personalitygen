@@ -12,7 +12,7 @@
 - Use PDM to capture application and dev-only dependencies. Document the canonical install command (e.g., `pdm install --group dev`).
 - Target runtimes: Python 3.14+ always.
 - Enforce version policy in `pyproject.toml`: set `requires-python = ">=3.14"`.
-- Expose a single test runner command (`pdm run pytest`) that covers any supporting packages.
+- Expose a single test runner command (`pdm run test`) that covers any supporting packages.
 
 ## Coding Style & Naming Conventions
 - Use 4-space indentation, type-annotate every function, and prefer built-in generics (`list[str]`, `dict[str, Any]`) with `| None` for optionals on Python 3.14+.
