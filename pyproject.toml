@@ -3,10 +3,31 @@ name = "personalitygen"
 version = "0.1.0"
 description = "Generate and manage simulated human-like personalities based on the Big Five model."
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "B.T. Franklin"}]
 keywords = ["personality", "big-five", "ocean", "simulation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/btfranklin/personalitygen"
+Issues = "https://github.com/btfranklin/personalitygen/issues"
+Changelog = "https://github.com/btfranklin/personalitygen/releases"
+Repository = "https://github.com/btfranklin/personalitygen.git"
+
 dependencies = []
 
 [project.urls]
