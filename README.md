@@ -1,6 +1,8 @@
 # personalitygen
 
-![personalitygen social preview](.github/social%20preview/personalitygen_social_preview.jpg)
+![personalitygen social preview](https://raw.githubusercontent.com/btfranklin/personalitygen/main/.github/social%20preview/personalitygen_social_preview.jpg "personalitygen")
+
+[![Build Status](https://github.com/btfranklin/personalitygen/actions/workflows/python-package.yml/badge.svg)](https://github.com/btfranklin/personalitygen/actions/workflows/python-package.yml) [![Supports Python versions 3.11+](https://img.shields.io/pypi/pyversions/personalitygen.svg)](https://pypi.python.org/pypi/personalitygen)
 
 `personalitygen` generates and manages simulated human-like personalities based on the Big Five (OCEAN) model. It is designed for
 simulation, storytelling, and testing scenarios where you want plausible, varied personality profiles without running surveys.

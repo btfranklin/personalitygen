@@ -48,9 +48,9 @@ dev = [
     "flake8>=7.3.0",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.pdm.scripts]
 test = "pytest"
 lint = "flake8 src tests"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
