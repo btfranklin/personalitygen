@@ -3,11 +3,6 @@
 ## Project Structure & Module Organization
 - Consolidate architecture notes, runbooks, and decision records in `docs/`. Before major refactors, review and extend these documents to keep system knowledge current.
 
-## Reference Materials
-- A `reference/` folder may be present containing curated documentation and guides for common integration patterns. This folder is optional and may not exist in all clones of this repository.
-- **If the folder exists, start by reading `reference/CONTENTS.md`** — it summarizes all available reference materials so you can quickly find what you need.
-- Do not assume any specific documents or directories are present; always check `CONTENTS.md` first to see what materials are actually available.
-
 ## Build, Test, and Development Commands
 - Use PDM to capture application and dev-only dependencies. Document the canonical install command (e.g., `pdm install --group dev`).
 - Target runtimes: Python 3.14+ always.
