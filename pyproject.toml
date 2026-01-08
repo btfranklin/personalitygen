@@ -1,10 +1,10 @@
 [project]
 name = "personalitygen"
-version = "0.1.1"
+dynamic = ["version"]
 description = "Generate and manage simulated human-like personalities based on the Big Five model."
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 authors = [
     {name = "B.T. Franklin", email = "brandon.franklin@gmail.com"},
 ]
@@ -37,7 +37,9 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
-packages = [{include = "personalitygen", from = "src"}]
+
+[tool.pdm.version]
+source = "scm"
 
 [tool.pdm.build]
 excludes = ["tests/**"]
@@ -45,7 +47,7 @@ excludes = ["tests/**"]
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
-    "flake8>=7.3.0",
+    "ruff>=0.14.11",
 ]
 
 [tool.pytest.ini_options]
@@ -53,4 +55,7 @@ testpaths = ["tests"]
 
 [tool.pdm.scripts]
 test = "pytest"
-lint = "flake8 src tests"
+lint = "ruff check src tests"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
