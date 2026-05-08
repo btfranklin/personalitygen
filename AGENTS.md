@@ -1,26 +1,24 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
-- Consolidate architecture notes, runbooks, and decision records in `docs/`. Before major refactors, review and extend these documents to keep system knowledge current.
+## Start Here
+- [docs/README.md](docs/README.md) is the documentation index and system of record.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) explains the package boundaries, domain model, and extension rules.
+- [docs/QUALITY.md](docs/QUALITY.md) defines validation commands, testing expectations, dependency policy, and release/runtime constraints.
+- [docs/LEGIBILITY_AUDIT.md](docs/LEGIBILITY_AUDIT.md) tracks repo-legibility gaps and next cleanup work.
 
-## Build, Test, and Development Commands
-- Use PDM to capture application and dev-only dependencies. Document the canonical install command (e.g., `pdm install --group dev`).
-- Target runtimes: Python 3.14+ always.
-- Enforce version policy in `pyproject.toml`: set `requires-python = ">=3.14"`.
-- Expose a single test runner command (`pdm run test`) that covers any supporting packages.
+## Project Shape
+- `personalitygen` is a dependency-free Python 3.11+ library for simulated Big Five personality profiles.
+- Source lives in `src/personalitygen/`; tests live in top-level `tests/`.
+- Keep `AGENTS.md` short. Put durable architecture, quality, and planning detail in `docs/`.
 
-## Coding Style & Naming Conventions
-- Use 4-space indentation, type-annotate every function, and prefer built-in generics (`list[str]`, `dict[str, Any]`) with `| None` for optionals on Python 3.14+.
-- Keep Django apps modular: new views, forms, services, and tasks should live under the app that owns the corresponding data or workflow.
-- Treat the linter as non-optional. Run it locally before committing; unresolved linting errors should block CI.
-- Write docstrings and comments in American English; focus on clarifying intent rather than restating code.
+## Working Commands
+- Install: `pdm install --group dev`
+- Tests: `pdm run test`
+- Lint: `pdm run lint`
 
-## Testing Guidelines
-- Keep tests in the top-level `tests/` folder (sibling to `src/`). Name modules `test_*.py`, classes `Test*`, and functions `test_*` for automatic discovery.
-- Cover asynchronous tasks, external service adapters, and LLM helpers with deterministic fixtures. Mock network-bound APIs so the suite stays offline and fast.
-- Make `pdm run pytest` (or the equivalent) the default validation step before pushing changes.
-
-## Commit & Pull Request Guidelines
-- Favor concise, sentence-case commit messages that describe both the change and its intent (e.g., `Add credit balance tracking to user profiles`).
-- Keep commits scoped to a single concern. Mention the affected app or feature area when useful for reviewers.
-- Pull requests should summarize the change set, call out new migrations, list manual or automated test results, and attach UI screenshots or logs for behavioral updates.
+## Change Rules
+- Use PDM for dependency and environment management.
+- Keep runtime support aligned across `pyproject.toml`, README badges, docs, and GitHub Actions.
+- Do not introduce Python 3.14-only syntax unless the package metadata and CI matrix are intentionally raised from Python 3.11+.
+- Keep runtime dependencies empty unless the package genuinely needs one; dev dependencies should use lower bounds such as `>=`.
+- Tests should encode the behavioral contract: unit-range validation, aggregate scoring, life-stage sampling, deterministic randomness, and conflict-style derivation.

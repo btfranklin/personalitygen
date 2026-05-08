@@ -47,7 +47,12 @@ print(traits)
 
 ## Development
 
+This package targets Python 3.11+.
+
 ```bash
 pdm install --group dev
 pdm run test
+pdm run lint
 ```
+
+Deeper architecture, quality, and maintenance guidance lives in [`docs/`](docs/README.md).

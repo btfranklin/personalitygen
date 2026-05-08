@@ -18,6 +18,11 @@ def _validate_unit_range(*values: float) -> None:
             )
 
 
+def _component_average_score(*values: float) -> float:
+    _validate_unit_range(*values)
+    return sum(values) / len(values)
+
+
 def _format_score(value: float) -> str:
     return format(value, ".2g")
 
@@ -121,20 +126,14 @@ class BigFiveOpenness:
     score: float = field(init=False)
 
     def __post_init__(self) -> None:
-        _validate_unit_range(
-            self.aesthetic_sensitivity_score,
-            self.creative_imagination_score,
-            self.intellectual_curiosity_score,
-        )
         object.__setattr__(
             self,
             "score",
-            (
-                self.aesthetic_sensitivity_score
-                + self.creative_imagination_score
-                + self.intellectual_curiosity_score
-            )
-            / 3,
+            _component_average_score(
+                self.aesthetic_sensitivity_score,
+                self.creative_imagination_score,
+                self.intellectual_curiosity_score,
+            ),
         )
 
     @classmethod
@@ -169,20 +168,14 @@ class BigFiveConscientiousness:
     score: float = field(init=False)
 
     def __post_init__(self) -> None:
-        _validate_unit_range(
-            self.organization_score,
-            self.responsibility_score,
-            self.productivity_score,
-        )
         object.__setattr__(
             self,
             "score",
-            (
-                self.organization_score
-                + self.responsibility_score
-                + self.productivity_score
-            )
-            / 3,
+            _component_average_score(
+                self.organization_score,
+                self.responsibility_score,
+                self.productivity_score,
+            ),
         )
 
     @classmethod
@@ -215,20 +208,14 @@ class BigFiveExtraversion:
     score: float = field(init=False)
 
     def __post_init__(self) -> None:
-        _validate_unit_range(
-            self.assertiveness_score,
-            self.sociability_score,
-            self.energy_level_score,
-        )
         object.__setattr__(
             self,
             "score",
-            (
-                self.assertiveness_score
-                + self.sociability_score
-                + self.energy_level_score
-            )
-            / 3,
+            _component_average_score(
+                self.assertiveness_score,
+                self.sociability_score,
+                self.energy_level_score,
+            ),
         )
 
     @classmethod
@@ -261,20 +248,14 @@ class BigFiveAgreeableness:
     score: float = field(init=False)
 
     def __post_init__(self) -> None:
-        _validate_unit_range(
-            self.compassion_score,
-            self.respectfulness_score,
-            self.trust_score,
-        )
         object.__setattr__(
             self,
             "score",
-            (
-                self.compassion_score
-                + self.respectfulness_score
-                + self.trust_score
-            )
-            / 3,
+            _component_average_score(
+                self.compassion_score,
+                self.respectfulness_score,
+                self.trust_score,
+            ),
         )
 
     @classmethod
@@ -307,20 +288,14 @@ class BigFiveNeuroticism:
     score: float = field(init=False)
 
     def __post_init__(self) -> None:
-        _validate_unit_range(
-            self.anxiety_score,
-            self.emotional_volatility_score,
-            self.depression_score,
-        )
         object.__setattr__(
             self,
             "score",
-            (
-                self.anxiety_score
-                + self.emotional_volatility_score
-                + self.depression_score
-            )
-            / 3,
+            _component_average_score(
+                self.anxiety_score,
+                self.emotional_volatility_score,
+                self.depression_score,
+            ),
         )
 
     @classmethod
