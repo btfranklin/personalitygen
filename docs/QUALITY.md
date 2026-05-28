@@ -39,6 +39,10 @@ Tests should protect the package's public behavior, not only current implementat
 - life-stage bias should keep its intended direction unless a domain decision changes it
 - seeded generation should be deterministic
 - conflict-resolution styles should remain reachable and mapped to concern priorities
+- ABBF scores should stay in the signed range
+- ABBF vector order, pole metadata, dominant-pole selection, and Big Five projection should stay stable
+- ABBF dot product and cosine similarity should handle zero vectors predictably
+- runnable examples should execute successfully under the test suite
 - the public package export surface should stay explicit
 - docs and metadata should agree about the supported Python runtime
 

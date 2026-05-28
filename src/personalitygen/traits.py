@@ -5,22 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Self
 
-from personalitygen.constants import UNIT_RANGE_MAX, UNIT_RANGE_MIN
+from personalitygen._scoring import component_average_score
+from personalitygen.constants import UNIT_RANGE_MAX
 from personalitygen.enums import LifeStage
 from personalitygen.randomness import RandomSource, random_gaussian
-
-
-def _validate_unit_range(*values: float) -> None:
-    for value in values:
-        if not (UNIT_RANGE_MIN <= value <= UNIT_RANGE_MAX):
-            raise ValueError(
-                "All trait components must be in the range 0.0...1.0"
-            )
-
-
-def _component_average_score(*values: float) -> float:
-    _validate_unit_range(*values)
-    return sum(values) / len(values)
 
 
 def _format_score(value: float) -> str:
@@ -129,7 +117,7 @@ class BigFiveOpenness:
         object.__setattr__(
             self,
             "score",
-            _component_average_score(
+            component_average_score(
                 self.aesthetic_sensitivity_score,
                 self.creative_imagination_score,
                 self.intellectual_curiosity_score,
@@ -171,7 +159,7 @@ class BigFiveConscientiousness:
         object.__setattr__(
             self,
             "score",
-            _component_average_score(
+            component_average_score(
                 self.organization_score,
                 self.responsibility_score,
                 self.productivity_score,
@@ -211,7 +199,7 @@ class BigFiveExtraversion:
         object.__setattr__(
             self,
             "score",
-            _component_average_score(
+            component_average_score(
                 self.assertiveness_score,
                 self.sociability_score,
                 self.energy_level_score,
@@ -251,7 +239,7 @@ class BigFiveAgreeableness:
         object.__setattr__(
             self,
             "score",
-            _component_average_score(
+            component_average_score(
                 self.compassion_score,
                 self.respectfulness_score,
                 self.trust_score,
@@ -291,7 +279,7 @@ class BigFiveNeuroticism:
         object.__setattr__(
             self,
             "score",
-            _component_average_score(
+            component_average_score(
                 self.anxiety_score,
                 self.emotional_volatility_score,
                 self.depression_score,

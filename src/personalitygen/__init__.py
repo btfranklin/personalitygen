@@ -1,5 +1,11 @@
 """Public interface for personalitygen."""
 
+from personalitygen.adaptive import (
+    AdaptiveBifurcatedAxis,
+    AdaptiveBifurcatedDomain,
+    AdaptiveBifurcatedPole,
+    AdaptiveBifurcatedProfile,
+)
 from personalitygen.enums import LifeStage, PriorityLevel
 from personalitygen.personality import (
     BigFiveConflictResolutionConfiguration,
@@ -16,6 +22,10 @@ from personalitygen.traits import (
 )
 
 __all__ = [
+    "AdaptiveBifurcatedAxis",
+    "AdaptiveBifurcatedDomain",
+    "AdaptiveBifurcatedPole",
+    "AdaptiveBifurcatedProfile",
     "BigFiveAgreeableness",
     "BigFiveConscientiousness",
     "BigFiveConflictResolutionConfiguration",

@@ -12,8 +12,8 @@
 - `AGENTS.md` has been reduced to a short map and no longer contains unrelated Django, async-task, or Python 3.14-only guidance.
 - Runtime policy is documented as Python 3.11+ to match `pyproject.toml`, README badges, and the CI matrix.
 - Architecture and quality guidance now live under `docs/`.
-- Trait aggregate scoring has a shared helper so every trait class uses the same validation and average calculation rule.
-- Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, public exports, and documentation/runtime alignment.
+- Score validation and vector math now live in a small internal helper shared by Big Five and ABBF models.
+- Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, ABBF vectors, runnable examples, public exports, and documentation/runtime alignment.
 
 ## Remaining Pressure Points
 

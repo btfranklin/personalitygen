@@ -4,25 +4,27 @@
 
 [![Build Status](https://github.com/btfranklin/personalitygen/actions/workflows/python-package.yml/badge.svg)](https://github.com/btfranklin/personalitygen/actions/workflows/python-package.yml) [![Supports Python versions 3.11+](https://img.shields.io/pypi/pyversions/personalitygen.svg)](https://pypi.python.org/pypi/personalitygen)
 
-`personalitygen` generates and manages simulated human-like personalities based on the Big Five (OCEAN) model. It is designed for
-simulation, storytelling, and testing scenarios where you want plausible, varied personality profiles without running surveys.
+`personalitygen` generates simulated character personalities for games, storytelling, simulations, and tests. It supports
+conventional Big Five (OCEAN) profiles and Adaptive Bifurcated Big Five (ABBF) signed-vector profiles.
 
 ## Intent and scope
 
 - Generate full Big Five profiles with sub-trait components and aggregate scores.
+- Generate ABBF profiles as signed 5D vectors with dominant poles.
 - Bias outputs by life stage using tuned Gaussian distributions (child, young adult, adult).
 - Derive a conflict-resolution style from trait weights, plus mapped concern-for-self/others.
+- Project Big Five profiles into ABBF vectors for systems that want both model shapes.
 - Support deterministic generation by accepting a seeded random source.
 - Stay lightweight and dependency-free (pure Python).
-
-This package is not a clinical assessment tool and does not implement questionnaires or scoring rubrics.
 
 ## Model overview
 
 - Big Five traits: openness, conscientiousness, extraversion, agreeableness, neuroticism.
-- Each trait is composed of three sub-traits and a weighted aggregate score.
+- Each trait is composed of three sub-traits and an aggregate score.
 - Life stage influences distribution means and standard deviations for sampling.
 - Conflict-resolution style is selected from avoiding, obliging, integrating, dominating, or compromising based on trait scores.
+- ABBF profiles use five signed axes in chart order: order, chaos, cooperation, conflict, and competition.
+- Positive ABBF values select the chart's left pole; negative values select the chart's right pole.
 
 ## Usage
 
@@ -45,6 +47,19 @@ traits = BigFiveTraitConfiguration.random(LifeStage.YOUNG_ADULT, rng=rng)
 print(traits)
 ```
 
+ABBF profiles can be generated directly or projected from Big Five traits:
+
+```python
+from personalitygen import AdaptiveBifurcatedProfile
+
+profile = AdaptiveBifurcatedProfile.random()
+print(profile.vector)
+print(profile.dominant_poles(threshold=0.2))
+
+projected = AdaptiveBifurcatedProfile.from_big_five(traits)
+print(projected.cosine_similarity(profile))
+```
+
 ## Development
 
 This package targets Python 3.11+.
@@ -56,3 +71,4 @@ pdm run lint
 ```
 
 Deeper architecture, quality, and maintenance guidance lives in [`docs/`](docs/README.md).
+Simulation recipes live in [`docs/USAGE.md`](docs/USAGE.md), and runnable examples live in [`examples/`](examples/).

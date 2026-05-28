@@ -33,7 +33,7 @@ jobs:
           pdm install --group dev
       - name: Lint with ruff
         run: |
-          pdm run ruff check src tests --statistics
+          pdm run lint
       - name: Test with pytest
         run: |
-          pdm run pytest
+          pdm run test

@@ -1,14 +1,14 @@
 [project]
 name = "personalitygen"
 dynamic = ["version"]
-description = "Generate and manage simulated human-like personalities based on the Big Five model."
+description = "Generate simulated character personalities for games, stories, and simulations."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
 authors = [
     {name = "B.T. Franklin", email = "brandon.franklin@gmail.com"},
 ]
-keywords = ["personality", "big-five", "ocean", "simulation"]
+keywords = ["personality", "big-five", "ocean", "abbf", "simulation"]
 dependencies = []
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -55,7 +55,7 @@ testpaths = ["tests"]
 
 [tool.pdm.scripts]
 test = "pytest"
-lint = "ruff check src tests"
+lint = "ruff check src tests examples"
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]

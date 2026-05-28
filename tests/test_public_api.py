@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 import personalitygen
+from personalitygen.adaptive import (
+    AdaptiveBifurcatedAxis,
+    AdaptiveBifurcatedDomain,
+    AdaptiveBifurcatedPole,
+    AdaptiveBifurcatedProfile,
+)
 from personalitygen.enums import LifeStage, PriorityLevel
 from personalitygen.personality import (
     BigFiveConflictResolutionConfiguration,
@@ -18,6 +24,10 @@ from personalitygen.traits import (
 
 
 EXPECTED_PUBLIC_API = {
+    "AdaptiveBifurcatedAxis": AdaptiveBifurcatedAxis,
+    "AdaptiveBifurcatedDomain": AdaptiveBifurcatedDomain,
+    "AdaptiveBifurcatedPole": AdaptiveBifurcatedPole,
+    "AdaptiveBifurcatedProfile": AdaptiveBifurcatedProfile,
     "BigFiveAgreeableness": BigFiveAgreeableness,
     "BigFiveConscientiousness": BigFiveConscientiousness,
     "BigFiveConflictResolutionConfiguration": (
