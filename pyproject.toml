@@ -46,8 +46,8 @@ excludes = ["tests/**"]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.2",
-    "ruff>=0.14.11",
+    "pytest>=9.1.1",
+    "ruff>=0.15.18",
 ]
 
 [tool.pytest.ini_options]
