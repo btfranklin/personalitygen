@@ -110,3 +110,9 @@ ENV/
 
 # PDM
 .pdm-python
+
+# Node.js / TypeScript
+node_modules/
+.test-dist/
+.example-dist/
+*.tgz

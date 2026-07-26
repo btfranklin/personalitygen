@@ -1,0 +1,60 @@
+# personalitygen for TypeScript
+
+Generate simulated character personalities for games, stories, and
+simulations using the Big Five (OCEAN) and Adaptive Bifurcated Big Five
+(ABBF) models.
+
+The package is dependency-free, ESM-only, browser/bundler friendly, and ships
+JavaScript plus TypeScript declarations.
+
+## Install
+
+```shell
+npm install personalitygen
+```
+
+## Generate a character
+
+```typescript
+import {
+  AdaptiveBifurcatedProfile,
+  BigFivePersonality,
+  LifeStage,
+} from "personalitygen";
+
+const personality = BigFivePersonality.random(LifeStage.Adult);
+const adaptive = AdaptiveBifurcatedProfile.fromBigFive(
+  personality.traitConfiguration,
+);
+
+console.log(personality.conflictResolutionConfiguration);
+console.log(adaptive.vector);
+console.log(adaptive.dominantPoles(0.25));
+```
+
+Random factories use `Math.random` by default. Supply any structural random
+source when a game or simulation owns randomness:
+
+```typescript
+const rng = {
+  uniform(minimum: number, maximum: number): number {
+    return minimum + (maximum - minimum) * mySeededRandom();
+  },
+};
+
+const personality = BigFivePersonality.random(LifeStage.Adult, { rng });
+```
+
+## Models
+
+- `BigFivePersonality` combines a five-trait configuration with a weighted
+  conflict-resolution style.
+- `AdaptiveBifurcatedProfile` represents the signed ABBF vector in canonical
+  order: order, chaos, cooperation, conflict, competition.
+- All exported model instances and enum-like value objects are frozen.
+- Numeric constructors throw `RangeError` for invalid ranges; categorical
+  constructors throw `TypeError` for unsupported values.
+
+See the [repository documentation](https://github.com/btfranklin/personalitygen)
+for the behavioral specification, Python peer, examples, and contribution
+guidance.

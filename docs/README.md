@@ -14,16 +14,15 @@ This directory is the source of truth for repository structure, domain rules, va
 
 ## Fast Orientation
 
-`personalitygen` is organized as a language-neutral repository with
-first-class implementations under `packages/`. The current Python 3.11+
-package is dependency-free and exposes immutable value objects for Big Five
-traits, conflict-resolution configuration, and ABBF signed-vector profiles.
-Random generation accepts an optional seeded random source so callers can
-reproduce game, story, and simulation characters.
+`personalitygen` is organized as a language-neutral repository with equal
+Python and TypeScript implementations under `packages/`. Both are
+dependency-free and expose immutable value objects for Big Five traits,
+conflict-resolution configuration, and ABBF signed-vector profiles. Random
+generation accepts an optional caller-owned random source so games, stories,
+and simulations can control reproducibility.
 
 The language-neutral model and conformance fixtures live under `spec/`. A
 behavior change must update that contract together with every implementation.
 
-Before changing Python behavior, read the architecture and quality docs, then
-run `pdm run -p packages/python test` and
-`pdm run -p packages/python lint`.
+Before changing behavior, read the architecture and quality docs, then run both
+language suites described in [Quality](QUALITY.md).

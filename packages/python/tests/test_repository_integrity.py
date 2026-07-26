@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -21,6 +22,8 @@ CORE_DOCUMENTATION = (
 MARKDOWN_SOURCES = (
     Path("AGENTS.md"),
     Path("README.md"),
+    Path("packages/python/README.md"),
+    Path("packages/typescript/README.md"),
     *sorted(
         path.relative_to(REPOSITORY_ROOT)
         for path in (REPOSITORY_ROOT / "docs").rglob("*.md")
@@ -102,5 +105,21 @@ def test_package_metadata_matches_repository_policy() -> None:
     assert (PACKAGE_ROOT / project["readme"]).is_file()
     assert (PACKAGE_ROOT / project["license"]["file"]).is_file()
     assert (PACKAGE_ROOT / "LICENSE").read_text(encoding="utf-8") == (
+        REPOSITORY_ROOT / "LICENSE"
+    ).read_text(encoding="utf-8")
+
+
+def test_typescript_metadata_matches_repository_policy() -> None:
+    typescript_root = REPOSITORY_ROOT / "packages" / "typescript"
+    package = json.loads(
+        (typescript_root / "package.json").read_text(encoding="utf-8")
+    )
+
+    assert package["name"] == "personalitygen"
+    assert package["version"] == "0.3.0"
+    assert "dependencies" not in package
+    assert package["devDependencies"]["typescript"].startswith(">=7.")
+    assert (typescript_root / "README.md").is_file()
+    assert (typescript_root / "LICENSE").read_text(encoding="utf-8") == (
         REPOSITORY_ROOT / "LICENSE"
     ).read_text(encoding="utf-8")

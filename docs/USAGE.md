@@ -9,9 +9,18 @@ shapes:
 - ABBF profiles for signed 5D vectors that are easy to compare, filter, and
   use as gameplay or simulation parameters.
 
-The examples below use Python. Their model semantics are defined by the
-[shared behavioral contract](../spec/BEHAVIOR.md), which every language
-implementation must satisfy.
+Python and TypeScript expose the same concepts with language-idiomatic names:
+
+| Concept | Python | TypeScript |
+| --- | --- | --- |
+| complete random profile | `BigFivePersonality.random()` | `BigFivePersonality.random()` |
+| Big Five to ABBF | `from_big_five()` | `fromBigFive()` |
+| trait configuration | `trait_configuration` | `traitConfiguration` |
+| dominant poles | `dominant_poles()` | `dominantPoles()` |
+| vector similarity | `cosine_similarity()` | `cosineSimilarity()` |
+
+Their model semantics are defined by the
+[shared behavioral contract](../spec/BEHAVIOR.md).
 
 ## Generate A Character
 
@@ -32,6 +41,18 @@ print(personality.conflict_resolution_configuration.conflict_resolution_style)
 
 Pass a seeded random source when a world, save file, test fixture, or content
 pipeline needs reproducible output.
+
+The TypeScript equivalent accepts any object with `uniform(minimum, maximum)`:
+
+```typescript
+import { BigFivePersonality, LifeStage } from "personalitygen";
+
+const personality = BigFivePersonality.random(LifeStage.Adult, { rng });
+console.log(personality.traitConfiguration);
+console.log(
+  personality.conflictResolutionConfiguration.conflictResolutionStyle,
+);
+```
 
 ## Use ABBF As A Character Vector
 
@@ -60,6 +81,14 @@ side dominates. The canonical vector order is:
 4. conflict: harmonizing vs utilitarianism
 5. competition: proficiency vs dominancy
 
+```typescript
+import { AdaptiveBifurcatedProfile } from "personalitygen";
+
+const profile = AdaptiveBifurcatedProfile.random({ rng });
+console.log(profile.vector);
+console.log(profile.dominantPoles(0.25));
+```
+
 ## Project Big Five Into ABBF
 
 Use `AdaptiveBifurcatedProfile.from_big_five()` when an existing generator or
@@ -79,6 +108,15 @@ for axis in profile.axes:
 Projection is a stable generator heuristic documented in
 [`decisions/0002-adaptive-bifurcated-model.md`](decisions/0002-adaptive-bifurcated-model.md).
 
+```typescript
+const traits = BigFiveTraitConfiguration.random(LifeStage.YoungAdult, { rng });
+const profile = AdaptiveBifurcatedProfile.fromBigFive(traits);
+
+for (const axis of profile.axes) {
+  console.log(axis.domain, axis.score, axis.dominantPole);
+}
+```
+
 ## Compare And Select Characters
 
 Use `.dot_product()` or `.cosine_similarity()` for character matching,
@@ -97,12 +135,19 @@ Use `.dominant_poles(threshold=...)` when you need readable tags for filters,
 dialogue conditions, faction membership, procedural quest roles, or debugging
 tools.
 
+TypeScript uses `left.cosineSimilarity(right)` and
+`profile.dominantPoles(threshold)` for the same operations.
+
 ## Runnable Examples
 
-The `packages/python/examples/` directory contains small scripts that
-demonstrate typical simulation workflows:
+Both `packages/python/examples/` and `packages/typescript/examples/` contain
+parallel scripts that demonstrate typical simulation workflows:
 
-- `generate_npc.py`: generate a full character and project it into ABBF.
-- `project_big_five_to_abbf.py`: inspect a fixed Big Five-to-ABBF projection.
-- `compare_characters.py`: compare authored ABBF vectors.
-- `select_npcs_by_pole.py`: filter a small cast by dominant ABBF poles.
+- `generate_npc.py` / `generate-npc.ts`: generate a full character and project
+  it into ABBF.
+- `project_big_five_to_abbf.py` / `project-big-five-to-abbf.ts`: inspect a
+  fixed Big Five-to-ABBF projection.
+- `compare_characters.py` / `compare-characters.ts`: compare authored ABBF
+  vectors.
+- `select_npcs_by_pole.py` / `select-npcs-by-pole.ts`: filter a small cast by
+  dominant ABBF poles.

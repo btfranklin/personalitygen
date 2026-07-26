@@ -4,17 +4,21 @@
 
 `personalitygen` generates character personality profiles for games, storytelling, simulations, and tests. Its models are generator-friendly value objects with explicit score contracts and deterministic random sampling when callers supply a seeded random source.
 
-The repository is deliberately small. Its current Python implementation has:
+The repository is deliberately small. Both implementations have:
 
 - no runtime dependencies
-- Python 3.11+ support
-- immutable dataclass value objects
-- deterministic generation when a seeded random source is supplied
+- immutable value objects
+- caller-controlled random generation
 - public imports from `personalitygen`
+
+Python supports 3.11–3.14 and uses frozen dataclasses. TypeScript publishes ESM
+targeting ES2022 and uses frozen classes plus frozen const objects.
 
 ## Repository Map
 
 - `packages/python/`: independently buildable Python distribution, tests, and
+  examples.
+- `packages/typescript/`: independently buildable npm distribution, tests, and
   examples.
 - `spec/`: language-neutral behavioral model and conformance fixtures consumed
   by implementation test suites.
@@ -31,6 +35,22 @@ The repository is deliberately small. Its current Python implementation has:
 - `packages/python/src/personalitygen/adaptive.py`: Adaptive Bifurcated Big Five signed-vector profiles, axis metadata, and Big Five projection.
 - `packages/python/src/personalitygen/__init__.py`: the stable public import surface.
 
+## TypeScript Module Map
+
+- `packages/typescript/src/enums.ts`: public frozen categorical values and
+  their string-union types.
+- `packages/typescript/src/randomness.ts`: the structural `RandomSource` and
+  truncated-Gaussian helper.
+- `packages/typescript/src/scoring.ts`: internal score validation, projection,
+  and vector math.
+- `packages/typescript/src/traits.ts`: Big Five value objects and life-stage
+  sampling.
+- `packages/typescript/src/personality.ts`: trait configurations, weighted
+  conflict resolution, and complete personality generation.
+- `packages/typescript/src/adaptive.ts`: ABBF profiles, axes, projection, and
+  vector operations.
+- `packages/typescript/src/index.ts`: the stable public export surface.
+
 ## Dependency Direction
 
 The core direction is intentionally simple:
@@ -46,7 +66,8 @@ constants/enums/randomness/_scoring
         -> __init__ public exports
 ```
 
-Do not make lower-level modules import from `personality.py` or `__init__.py`. Keep `randomness.py` generic and free of trait or personality knowledge. Keep `_scoring.py` free of model-specific names so Big Five and ABBF can share it without coupling their public types.
+Within either package, keep randomness and scoring helpers free of model
+knowledge. Public index modules should collect exports, not own behavior.
 
 No language package imports from another language package. Implementations own
 their runtime constants and algorithms; their tests consume `spec/` to detect
@@ -83,25 +104,27 @@ ABBF random generation samples all five axes symmetrically around zero. ABBF Big
 
 When adding a new life stage:
 
-1. Add the enum member in `enums.py`.
-2. Add means for every trait configuration in `traits.py`.
-3. Update tests so every trait samples the new stage and preserves the intended stage-bias contract.
-4. Update README examples or docs if the new stage is user-facing.
+1. Update `spec/model.json` and its conformance fixtures.
+2. Add the categorical value and means in both implementations.
+3. Update both test suites.
+4. Update examples or docs if the stage is user-facing.
 
 When adding a new trait component:
 
-1. Update the owning trait dataclass and its random constructor.
-2. Revisit the aggregate score contract in this document.
-3. Update parameterized trait tests so validation, aggregate scoring, string formatting, and random sampling all cover the new component.
+1. Update the shared model.
+2. Update the owning value object and random constructor in each language.
+3. Revisit the aggregate score contract in this document.
+4. Update conformance and package tests.
 
 When adding a new public type:
 
-1. Export it from `packages/python/src/personalitygen/__init__.py`.
-2. Add it to `__all__`.
-3. Add tests for the public import surface.
+1. Add idiomatic public types in both packages when the concept is shared.
+2. Export from the Python `__init__.py` and TypeScript `index.ts`.
+3. Add tests for both public surfaces.
 
 When changing ABBF axis semantics:
 
-1. Update the pole/domain metadata in `adaptive.py`.
-2. Update the ABBF decision record.
-3. Update tests for vector order, axis metadata, dominant poles, and Big Five projection.
+1. Update the shared model and fixtures.
+2. Update the pole/domain metadata in both language packages.
+3. Update the ABBF decision record.
+4. Update both suites for vector order, metadata, poles, and projection.

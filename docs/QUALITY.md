@@ -2,7 +2,7 @@
 
 ## Runtime And Dependency Policy
 
-The package targets Python 3.11 and newer. Keep this aligned in:
+The Python package targets Python 3.11–3.14. Keep this aligned in:
 
 - `packages/python/pyproject.toml` `requires-python`
 - README badges and wording
@@ -11,6 +11,14 @@ The package targets Python 3.11 and newer. Keep this aligned in:
 - `AGENTS.md` and these docs
 
 Runtime dependencies should remain empty unless a feature genuinely requires one. Development dependencies should be managed by PDM and use lower-bound constraints such as `>=`.
+
+The TypeScript package publishes ESM targeting ES2022 without a Node engine
+restriction. TypeScript 7 is the build compiler, while the emitted declarations
+must compile under TypeScript 6+. TypeScript is a development dependency, not a
+consumer runtime dependency. Manage TypeScript tooling with npm, commit
+`package-lock.json`, and use lower-bound development constraints.
+
+Python and TypeScript public versions move in lockstep.
 
 ## Cross-Language Contract
 
@@ -24,19 +32,22 @@ sampling.
 
 ```bash
 pdm install -p packages/python --group dev
+cd packages/typescript && npm ci
 ```
 
 ## Validation
 
-Run both commands before committing behavior changes:
+Run both language checks before committing behavior changes:
 
 ```bash
 pdm run -p packages/python test
 pdm run -p packages/python lint
+npm run --prefix packages/typescript check
 ```
 
-The PDM commands above run the offline pytest suite and Ruff over Python source,
-tests, and examples.
+The TypeScript check runs Biome, TypeScript 7 compilation, Node's built-in test
+runner, all conformance fixtures, TypeScript 6 declaration consumption, package
+content inspection, and an isolated tarball installation.
 
 ## Test Contracts
 
@@ -56,6 +67,10 @@ Tests should protect the package's public behavior, not only current implementat
 - docs and metadata should agree about the supported Python runtime
 - the Python implementation should satisfy every shared conformance fixture
 - the fixture set should be explicit so new files cannot be silently ignored
+- the TypeScript package should expose only ESM JavaScript and declarations
+- TypeScript value objects and categorical objects should stay frozen
+- TypeScript invalid numeric and categorical inputs should retain their
+  `RangeError` and `TypeError` split
 
 Prefer deterministic fake random sources or seeded `random.Random` instances. Keep the suite offline and fast.
 
@@ -63,7 +78,11 @@ Prefer deterministic fake random sources or seeded `random.Random` instances. Ke
 
 Before release, verify:
 
-1. The test matrix covers every advertised Python version.
-2. `pdm build -p packages/python` succeeds from a clean checkout.
-3. The generated package includes `py.typed`.
-4. README usage examples still work against the public import surface.
+1. Python CI passes on 3.11–3.14.
+2. TypeScript CI passes on Node 22, 24, and 26.
+3. `pdm build -p packages/python` succeeds and includes `py.typed`.
+4. `npm run --prefix packages/typescript check` succeeds and the tarball
+   contains only package metadata, license, README, ESM, declarations, and
+   source maps.
+5. Both package versions match the release tag.
+6. Both OIDC publishing workflows build and test from the release commit.

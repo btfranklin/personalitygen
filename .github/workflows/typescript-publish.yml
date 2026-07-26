@@ -1,0 +1,38 @@
+name: Upload TypeScript Package
+
+on:
+    release:
+        types: [published]
+
+permissions:
+    contents: read
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        environment: release
+        permissions:
+            contents: read
+            id-token: write
+        defaults:
+            run:
+                working-directory: packages/typescript
+
+        steps:
+            - uses: actions/checkout@v7
+            - name: Set up Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: "24"
+                  registry-url: https://registry.npmjs.org
+                  package-manager-cache: false
+            - name: Install dependencies
+              run: npm ci
+            - name: Validate package
+              run: npm run check
+            - name: Verify release tag
+              env:
+                  RELEASE_TAG: ${{ github.event.release.tag_name }}
+              run: npm run verify:release-tag
+            - name: Publish package with Trusted Publishing
+              run: npm publish --provenance --access public
