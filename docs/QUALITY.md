@@ -107,4 +107,21 @@ Before release, verify:
    contains only package metadata, license, README, ESM, declarations, and
    embedded-source JavaScript maps, then bundles for a browser target.
 5. Both package versions match the release tag.
-6. Both OIDC publishing workflows build and test from the release commit.
+6. The shared OIDC publishing workflow validates both packages from the
+   explicit release tag and uploads their exact artifacts before either
+   publisher job becomes eligible.
+
+## Publication And Recovery
+
+Publishing is unified in `.github/workflows/publish-packages.yml`. Publishing a
+GitHub Release runs both preflights and, only after both succeed, sends the
+downloaded preflight artifacts to PyPI and npm. A manual run requires an
+existing tag and exposes independent Python and TypeScript publish booleans;
+leaving both false performs preflight only.
+
+Registry publication cannot be atomic. If one registry fails after the other
+has accepted its artifact, never rebuild, edit, retag, or replace the released
+artifact. Correct only the credential or registry-availability problem, then
+use GitHub's **Re-run failed jobs** on that same workflow run. The retried
+publisher downloads the original successful preflight artifact. A new code
+change requires a new version and tag.

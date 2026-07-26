@@ -27,8 +27,8 @@
 - Runtime model tables remain explicit inside each implementation, while
   `spec/model.json` gives tests and other language implementations one
   canonical table-shaped reference.
-- Both publishing workflows must remain synchronized with the shared package
-  version and release tag.
+- The shared publishing workflow must validate both language packages from the
+  same release tag before either registry publisher becomes eligible.
 
 ## Entropy Controls
 
