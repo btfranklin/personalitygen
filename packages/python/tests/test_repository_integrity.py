@@ -16,6 +16,7 @@ CORE_DOCUMENTATION = (
     Path("docs/QUALITY.md"),
     Path("docs/LEGIBILITY_AUDIT.md"),
     Path("docs/decisions/README.md"),
+    Path("spec/BEHAVIOR.md"),
 )
 MARKDOWN_SOURCES = (
     Path("AGENTS.md"),
@@ -23,6 +24,10 @@ MARKDOWN_SOURCES = (
     *sorted(
         path.relative_to(REPOSITORY_ROOT)
         for path in (REPOSITORY_ROOT / "docs").rglob("*.md")
+    ),
+    *sorted(
+        path.relative_to(REPOSITORY_ROOT)
+        for path in (REPOSITORY_ROOT / "spec").rglob("*.md")
     ),
 )
 INLINE_LINK_DESTINATION = re.compile(

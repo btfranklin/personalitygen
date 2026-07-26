@@ -7,6 +7,9 @@ import statistics
 from typing import Protocol
 
 
+_CDF_EPSILON = 1e-12
+
+
 class RandomSource(Protocol):
     """Minimal interface needed for deterministic sampling."""
 
@@ -40,9 +43,8 @@ def random_gaussian(
     if lower >= upper:
         return max(min_value, min(max_value, mean))
 
-    cdf_epsilon = 1e-12
-    lower = max(lower, cdf_epsilon)
-    upper = min(upper, 1.0 - cdf_epsilon)
+    lower = max(lower, _CDF_EPSILON)
+    upper = min(upper, 1.0 - _CDF_EPSILON)
     if lower >= upper:
         return max(min_value, min(max_value, mean))
 

@@ -14,14 +14,18 @@
   `packages/python/pyproject.toml`, package badges, and the CI matrix.
 - The Python package, tests, examples, manifest, and lockfile live together
   under `packages/python/`, leaving the repository root language-neutral.
+- Shared model parameters and machine-readable behavior examples live under
+  `spec/`, and the Python suite proves that it consumes the complete fixture
+  set.
 - Architecture and quality guidance now live under `docs/`.
 - Score validation and vector math now live in a small internal helper shared by Big Five and ABBF models.
 - Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, ABBF vectors, runnable examples, public exports, and documentation/runtime alignment.
 
 ## Remaining Pressure Points
 
-- The life-stage sampling means are still embedded directly in `traits.py`. This is acceptable while the model is small, but a larger model may want a table-shaped specification that tests and docs can reference directly.
-- Conflict-style weights are documented only by code comments and tests. If this mapping becomes user-visible or research-sensitive, promote it into a domain note with rationale and expected tradeoffs.
+- Runtime model tables remain explicit inside each implementation, while
+  `spec/model.json` gives tests and other language implementations one
+  canonical table-shaped reference.
 - The release workflow should be checked whenever Python support changes so package metadata, CI, and build jobs move together.
 
 ## Entropy Controls

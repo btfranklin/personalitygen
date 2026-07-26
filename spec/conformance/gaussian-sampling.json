@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "name": "unit midpoint",
+      "mean": 0.5,
+      "standardDeviation": 0.2,
+      "minimum": 0.01,
+      "maximum": 1.0,
+      "uniformFraction": 0.5,
+      "expected": 0.5002339049201003
+    },
+    {
+      "name": "unit lower draw",
+      "mean": 0.7,
+      "standardDeviation": 0.32,
+      "minimum": 0.01,
+      "maximum": 1.0,
+      "uniformFraction": 0.1,
+      "expected": 0.28353892166485245
+    },
+    {
+      "name": "unit upper draw",
+      "mean": 0.3,
+      "standardDeviation": 0.16,
+      "minimum": 0.01,
+      "maximum": 1.0,
+      "uniformFraction": 0.9,
+      "expected": 0.5082714984825994
+    },
+    {
+      "name": "signed midpoint",
+      "mean": 0.0,
+      "standardDeviation": 0.35,
+      "minimum": -1.0,
+      "maximum": 1.0,
+      "uniformFraction": 0.5,
+      "expected": 0.0
+    },
+    {
+      "name": "signed lower draw",
+      "mean": 0.0,
+      "standardDeviation": 0.35,
+      "minimum": -1.0,
+      "maximum": 1.0,
+      "uniformFraction": 0.05,
+      "expected": -0.5692685335122561
+    },
+    {
+      "name": "signed upper draw",
+      "mean": 0.0,
+      "standardDeviation": 0.35,
+      "minimum": -1.0,
+      "maximum": 1.0,
+      "uniformFraction": 0.95,
+      "expected": 0.5692685335122561
+    },
+    {
+      "name": "collapsed bounds",
+      "mean": 0.4,
+      "standardDeviation": 0.2,
+      "minimum": 0.5,
+      "maximum": 0.5,
+      "uniformFraction": 0.3,
+      "expected": 0.5
+    }
+  ]
+}

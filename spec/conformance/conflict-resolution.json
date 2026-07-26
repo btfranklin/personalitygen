@@ -1,0 +1,73 @@
+{
+  "cases": [
+    {
+      "name": "flat profile",
+      "traits": {
+        "openness": 0.5,
+        "conscientiousness": 0.5,
+        "extraversion": 0.5,
+        "agreeableness": 0.5,
+        "neuroticism": 0.5
+      },
+      "weights": {
+        "avoiding": 0.3,
+        "obliging": 0.1,
+        "integrating": 0.2,
+        "dominating": 0.1,
+        "compromising": 0.1
+      },
+      "selections": [
+        {"uniformFraction": 0.0, "expected": "avoiding"},
+        {"uniformFraction": 0.2, "expected": "avoiding"},
+        {"uniformFraction": 0.49, "expected": "obliging"},
+        {"uniformFraction": 0.8, "expected": "dominating"}
+      ]
+    },
+    {
+      "name": "skewed profile",
+      "traits": {
+        "openness": 0.8,
+        "conscientiousness": 0.7,
+        "extraversion": 0.6,
+        "agreeableness": 0.9,
+        "neuroticism": 0.2
+      },
+      "weights": {
+        "avoiding": 0.1,
+        "obliging": 0.11,
+        "integrating": 0.33,
+        "dominating": 0.1,
+        "compromising": 0.1
+      },
+      "selections": [
+        {"uniformFraction": 0.0, "expected": "avoiding"},
+        {"uniformFraction": 0.2, "expected": "obliging"},
+        {"uniformFraction": 0.5, "expected": "integrating"},
+        {"uniformFraction": 0.8, "expected": "dominating"}
+      ]
+    },
+    {
+      "name": "maximum profile",
+      "traits": {
+        "openness": 1.0,
+        "conscientiousness": 1.0,
+        "extraversion": 1.0,
+        "agreeableness": 1.0,
+        "neuroticism": 1.0
+      },
+      "weights": {
+        "avoiding": 0.6,
+        "obliging": 0.2,
+        "integrating": 0.4,
+        "dominating": 0.1,
+        "compromising": 0.1
+      },
+      "selections": [
+        {"uniformFraction": 0.0, "expected": "avoiding"},
+        {"uniformFraction": 0.2, "expected": "avoiding"},
+        {"uniformFraction": 0.5, "expected": "obliging"},
+        {"uniformFraction": 0.8, "expected": "integrating"}
+      ]
+    }
+  ]
+}

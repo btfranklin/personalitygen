@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "tolerances": {
+    "arithmetic": 1e-12,
+    "gaussian": 1e-6
+  },
+  "ranges": {
+    "unit": [0.0, 1.0],
+    "traitSample": [0.01, 1.0],
+    "signed": [-1.0, 1.0]
+  },
+  "randomness": {
+    "cdfEpsilon": 1e-12,
+    "abbfStandardDeviation": 0.35
+  },
+  "lifeStages": ["child", "young_adult", "adult"],
+  "priorityLevels": ["low", "moderate", "high"],
+  "traits": {
+    "openness": {
+      "components": [
+        "aesthetic_sensitivity",
+        "creative_imagination",
+        "intellectual_curiosity"
+      ],
+      "standardDeviation": 0.16,
+      "means": {
+        "child": [0.80, 0.85, 0.85],
+        "young_adult": [0.70, 0.75, 0.75],
+        "adult": [0.60, 0.65, 0.65]
+      }
+    },
+    "conscientiousness": {
+      "components": ["organization", "responsibility", "productivity"],
+      "standardDeviation": 0.22,
+      "means": {
+        "child": [0.50, 0.55, 0.50],
+        "young_adult": [0.60, 0.65, 0.60],
+        "adult": [0.70, 0.75, 0.70]
+      }
+    },
+    "extraversion": {
+      "components": ["assertiveness", "sociability", "energy_level"],
+      "standardDeviation": 0.27,
+      "means": {
+        "child": [0.72, 0.70, 0.72],
+        "young_adult": [0.62, 0.60, 0.62],
+        "adult": [0.52, 0.50, 0.52]
+      }
+    },
+    "agreeableness": {
+      "components": ["compassion", "respectfulness", "trust"],
+      "standardDeviation": 0.18,
+      "means": {
+        "child": [0.55, 0.55, 0.40],
+        "young_adult": [0.65, 0.65, 0.50],
+        "adult": [0.75, 0.75, 0.60]
+      }
+    },
+    "neuroticism": {
+      "components": ["anxiety", "emotional_volatility", "depression"],
+      "standardDeviation": 0.32,
+      "means": {
+        "child": [0.70, 0.60, 0.55],
+        "young_adult": [0.60, 0.50, 0.45],
+        "adult": [0.50, 0.40, 0.35]
+      }
+    }
+  },
+  "conflictResolution": {
+    "minimumWeight": 0.1,
+    "styles": {
+      "avoiding": {
+        "coefficients": {
+          "neuroticism": 0.7,
+          "openness": -0.1,
+          "agreeableness": 0.2,
+          "conscientiousness": -0.2,
+          "extraversion": 0.0
+        },
+        "concerns": ["low", "low"]
+      },
+      "obliging": {
+        "coefficients": {
+          "neuroticism": 0.2,
+          "extraversion": -0.2,
+          "openness": -0.1,
+          "agreeableness": 0.3,
+          "conscientiousness": 0.0
+        },
+        "concerns": ["low", "high"]
+      },
+      "integrating": {
+        "coefficients": {
+          "openness": 0.1,
+          "agreeableness": 0.2,
+          "conscientiousness": 0.1,
+          "neuroticism": 0.0,
+          "extraversion": 0.0
+        },
+        "concerns": ["high", "high"]
+      },
+      "dominating": {
+        "coefficients": {
+          "neuroticism": -0.2,
+          "extraversion": 0.2,
+          "openness": -0.2,
+          "agreeableness": -0.4,
+          "conscientiousness": 0.2
+        },
+        "concerns": ["high", "low"]
+      },
+      "compromising": {
+        "coefficients": {
+          "neuroticism": 0.1,
+          "extraversion": 0.1,
+          "conscientiousness": -0.2,
+          "openness": 0.0,
+          "agreeableness": 0.0
+        },
+        "concerns": ["moderate", "moderate"]
+      }
+    }
+  },
+  "adaptive": {
+    "axes": [
+      {
+        "domain": "order",
+        "positivePole": "strategizing",
+        "negativePole": "improvisation"
+      },
+      {
+        "domain": "chaos",
+        "positivePole": "ethicality",
+        "negativePole": "instinctivity"
+      },
+      {
+        "domain": "cooperation",
+        "positivePole": "collaboration",
+        "negativePole": "independence"
+      },
+      {
+        "domain": "conflict",
+        "positivePole": "harmonizing",
+        "negativePole": "utilitarianism"
+      },
+      {
+        "domain": "competition",
+        "positivePole": "proficiency",
+        "negativePole": "dominancy"
+      }
+    ],
+    "projection": {
+      "order": {
+        "openness": 1.0
+      },
+      "chaos": {
+        "agreeableness": 0.45,
+        "conscientiousness": 0.35,
+        "neuroticism": -0.20
+      },
+      "cooperation": {
+        "extraversion": 0.55,
+        "agreeableness": 0.45
+      },
+      "conflict": {
+        "agreeableness": 0.40,
+        "neuroticism": 0.30,
+        "openness": 0.20,
+        "conscientiousness": -0.10
+      },
+      "competition": {
+        "conscientiousness": 0.50,
+        "agreeableness": 0.30,
+        "extraversion": -0.20
+      }
+    }
+  }
+}

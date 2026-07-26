@@ -16,6 +16,8 @@ The repository is deliberately small. Its current Python implementation has:
 
 - `packages/python/`: independently buildable Python distribution, tests, and
   examples.
+- `spec/`: language-neutral behavioral model and conformance fixtures consumed
+  by implementation test suites.
 - `docs/`: repository-wide architecture, quality, usage, and decisions.
 
 ## Python Module Map
@@ -46,7 +48,16 @@ constants/enums/randomness/_scoring
 
 Do not make lower-level modules import from `personality.py` or `__init__.py`. Keep `randomness.py` generic and free of trait or personality knowledge. Keep `_scoring.py` free of model-specific names so Big Five and ABBF can share it without coupling their public types.
 
+No language package imports from another language package. Implementations own
+their runtime constants and algorithms; their tests consume `spec/` to detect
+semantic drift. The specification is never loaded by published packages at
+runtime.
+
 ## Domain Contracts
+
+[`spec/BEHAVIOR.md`](../spec/BEHAVIOR.md) and `spec/model.json` are the
+canonical cross-language contract. The notes below summarize that contract for
+repository orientation.
 
 ### Big Five
 

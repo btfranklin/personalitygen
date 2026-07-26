@@ -9,6 +9,10 @@ shapes:
 - ABBF profiles for signed 5D vectors that are easy to compare, filter, and
   use as gameplay or simulation parameters.
 
+The examples below use Python. Their model semantics are defined by the
+[shared behavioral contract](../spec/BEHAVIOR.md), which every language
+implementation must satisfy.
+
 ## Generate A Character
 
 Use `BigFivePersonality.random()` when you want a complete character profile

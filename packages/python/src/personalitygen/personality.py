@@ -60,39 +60,10 @@ class BigFiveConflictResolutionStyle(str, Enum):
         *,
         rng: RandomSource | None = None,
     ) -> Self:
-        # These weights are loosely based on:
-        # Priyadarshini, S. (2017). Effect of Personality on Conflict
-        # Resolution Styles. IRA-International Journal of Management &
-        # Social Sciences, 7(2), 196-207.
-        style_levels = {
-            cls.AVOIDING: trait_configuration.neuroticism.score * 0.7
-            + trait_configuration.openness.score * -0.1
-            + trait_configuration.agreeableness.score * 0.2
-            + trait_configuration.conscientiousness.score * -0.2,
-            cls.OBLIGING: trait_configuration.neuroticism.score * 0.2
-            + trait_configuration.extraversion.score * -0.2
-            + trait_configuration.openness.score * -0.1
-            + trait_configuration.agreeableness.score * 0.3,
-            cls.INTEGRATING: trait_configuration.openness.score * 0.1
-            + trait_configuration.agreeableness.score * 0.2
-            + trait_configuration.conscientiousness.score * 0.1,
-            cls.DOMINATING: trait_configuration.neuroticism.score * -0.2
-            + trait_configuration.extraversion.score * 0.2
-            + trait_configuration.openness.score * -0.2
-            + trait_configuration.agreeableness.score * -0.4
-            + trait_configuration.conscientiousness.score * 0.2,
-            cls.COMPROMISING: trait_configuration.neuroticism.score * 0.1
-            + trait_configuration.extraversion.score * 0.1
-            + trait_configuration.conscientiousness.score * -0.2,
-        }
-
-        # Keep a small chance of selecting counter-indicated styles.
-        minimum_weight = 0.1
-        weights = {
-            style: max(level, minimum_weight)
-            for style, level in style_levels.items()
-        }
-        return _weighted_choice(weights, rng=rng)
+        return _weighted_choice(
+            _conflict_style_weights(trait_configuration),
+            rng=rng,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,6 +111,109 @@ class BigFiveTraitConfiguration:
             "neuroticism: "
             f"{self.neuroticism}"
         )
+
+
+# These weights are loosely based on:
+# Priyadarshini, S. (2017). Effect of Personality on Conflict Resolution
+# Styles. IRA-International Journal of Management & Social Sciences, 7(2),
+# 196-207.
+_CONFLICT_STYLE_COEFFICIENTS: dict[
+    BigFiveConflictResolutionStyle, dict[str, float]
+] = {
+    BigFiveConflictResolutionStyle.AVOIDING: {
+        "neuroticism": 0.7,
+        "openness": -0.1,
+        "agreeableness": 0.2,
+        "conscientiousness": -0.2,
+        "extraversion": 0.0,
+    },
+    BigFiveConflictResolutionStyle.OBLIGING: {
+        "neuroticism": 0.2,
+        "extraversion": -0.2,
+        "openness": -0.1,
+        "agreeableness": 0.3,
+        "conscientiousness": 0.0,
+    },
+    BigFiveConflictResolutionStyle.INTEGRATING: {
+        "openness": 0.1,
+        "agreeableness": 0.2,
+        "conscientiousness": 0.1,
+        "neuroticism": 0.0,
+        "extraversion": 0.0,
+    },
+    BigFiveConflictResolutionStyle.DOMINATING: {
+        "neuroticism": -0.2,
+        "extraversion": 0.2,
+        "openness": -0.2,
+        "agreeableness": -0.4,
+        "conscientiousness": 0.2,
+    },
+    BigFiveConflictResolutionStyle.COMPROMISING: {
+        "neuroticism": 0.1,
+        "extraversion": 0.1,
+        "conscientiousness": -0.2,
+        "openness": 0.0,
+        "agreeableness": 0.0,
+    },
+}
+_CONFLICT_MINIMUM_WEIGHT = 0.1
+
+
+def _conflict_style_weights(
+    trait_configuration: BigFiveTraitConfiguration,
+) -> dict[BigFiveConflictResolutionStyle, float]:
+    trait_scores = {
+        "openness": trait_configuration.openness.score,
+        "conscientiousness": trait_configuration.conscientiousness.score,
+        "extraversion": trait_configuration.extraversion.score,
+        "agreeableness": trait_configuration.agreeableness.score,
+        "neuroticism": trait_configuration.neuroticism.score,
+    }
+    coefficients = _CONFLICT_STYLE_COEFFICIENTS
+    avoiding = coefficients[BigFiveConflictResolutionStyle.AVOIDING]
+    obliging = coefficients[BigFiveConflictResolutionStyle.OBLIGING]
+    integrating = coefficients[BigFiveConflictResolutionStyle.INTEGRATING]
+    dominating = coefficients[BigFiveConflictResolutionStyle.DOMINATING]
+    compromising = coefficients[BigFiveConflictResolutionStyle.COMPROMISING]
+    style_levels = {
+        BigFiveConflictResolutionStyle.AVOIDING: (
+            trait_scores["neuroticism"] * avoiding["neuroticism"]
+            + trait_scores["openness"] * avoiding["openness"]
+            + trait_scores["agreeableness"] * avoiding["agreeableness"]
+            + trait_scores["conscientiousness"]
+            * avoiding["conscientiousness"]
+        ),
+        BigFiveConflictResolutionStyle.OBLIGING: (
+            trait_scores["neuroticism"] * obliging["neuroticism"]
+            + trait_scores["extraversion"] * obliging["extraversion"]
+            + trait_scores["openness"] * obliging["openness"]
+            + trait_scores["agreeableness"] * obliging["agreeableness"]
+        ),
+        BigFiveConflictResolutionStyle.INTEGRATING: (
+            trait_scores["openness"] * integrating["openness"]
+            + trait_scores["agreeableness"] * integrating["agreeableness"]
+            + trait_scores["conscientiousness"]
+            * integrating["conscientiousness"]
+        ),
+        BigFiveConflictResolutionStyle.DOMINATING: (
+            trait_scores["neuroticism"] * dominating["neuroticism"]
+            + trait_scores["extraversion"] * dominating["extraversion"]
+            + trait_scores["openness"] * dominating["openness"]
+            + trait_scores["agreeableness"] * dominating["agreeableness"]
+            + trait_scores["conscientiousness"]
+            * dominating["conscientiousness"]
+        ),
+        BigFiveConflictResolutionStyle.COMPROMISING: (
+            trait_scores["neuroticism"] * compromising["neuroticism"]
+            + trait_scores["extraversion"] * compromising["extraversion"]
+            + trait_scores["conscientiousness"]
+            * compromising["conscientiousness"]
+        ),
+    }
+    return {
+        style: max(level, _CONFLICT_MINIMUM_WEIGHT)
+        for style, level in style_levels.items()
+    }
 
 
 _STYLE_TO_CONCERNS: dict[

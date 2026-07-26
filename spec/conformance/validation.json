@@ -1,0 +1,36 @@
+{
+  "unitScores": {
+    "valid": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "invalid": [-0.000001, 1.000001]
+  },
+  "signedScores": {
+    "valid": [-1.0, -0.5, 0.0, 0.5, 1.0],
+    "invalid": [-1.000001, 1.000001]
+  },
+  "dominantPoleThresholds": {
+    "valid": [0.0, 0.25, 1.0],
+    "invalid": [-0.000001, 1.000001]
+  },
+  "gaussianParameters": {
+    "invalid": [
+      {
+        "mean": 0.5,
+        "standardDeviation": 0.0,
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      {
+        "mean": 0.5,
+        "standardDeviation": -0.1,
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      {
+        "mean": 0.5,
+        "standardDeviation": 0.1,
+        "minimum": 1.0,
+        "maximum": 0.0
+      }
+    ]
+  }
+}

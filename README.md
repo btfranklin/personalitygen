@@ -21,6 +21,7 @@ The repository is organized around first-class language packages:
 ```text
 packages/
   python/        Python package, tests, and examples
+spec/            Shared behavioral model and conformance fixtures
 docs/            Architecture, quality, usage, and decisions
 ```
 
@@ -33,4 +34,6 @@ pdm run -p packages/python lint
 ```
 
 See the [documentation index](docs/README.md) for architecture, quality, and
-maintenance guidance.
+maintenance guidance. The
+[behavioral contract](spec/BEHAVIOR.md) is the source of truth shared by every
+language implementation.
