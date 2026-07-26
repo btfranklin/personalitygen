@@ -1,6 +1,6 @@
 {
   "name": "personalitygen",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Generate simulated character personalities for games, stories, and simulations.",
   "type": "module",
   "main": "./dist/index.js",

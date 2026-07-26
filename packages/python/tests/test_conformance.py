@@ -78,9 +78,6 @@ class FractionRandom:
         fraction = next(self._fractions)
         return minimum + ((maximum - minimum) * fraction)
 
-    def gauss(self, mu: float, sigma: float) -> float:
-        raise AssertionError("Conformance sampling uses inverse-CDF draws.")
-
 
 def flat_traits(scores: dict[str, float]) -> BigFiveTraitConfiguration:
     return BigFiveTraitConfiguration(

@@ -119,5 +119,12 @@ export function randomGaussian(options: {
   if (!Number.isFinite(probability) || probability < lower || probability > upper) {
     throw new RangeError("RandomSource.uniform returned a value out of range.");
   }
-  return mean + standardDeviation * inverseStandardNormal(probability);
+  if (probability === lower) {
+    return minimum;
+  }
+  if (probability === upper) {
+    return maximum;
+  }
+  const sample = mean + standardDeviation * inverseStandardNormal(probability);
+  return Math.max(minimum, Math.min(maximum, sample));
 }

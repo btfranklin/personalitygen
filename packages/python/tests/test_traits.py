@@ -91,9 +91,6 @@ class MedianRandom:
             raise AssertionError(f"0.5 is outside requested range {a}..{b}")
         return 0.5
 
-    def gauss(self, mu: float, sigma: float) -> float:
-        raise AssertionError("gauss is not expected in this test")
-
 
 def make_trait(
     spec: TraitSpec,

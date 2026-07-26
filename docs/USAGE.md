@@ -47,6 +47,11 @@ The TypeScript equivalent accepts any object with `uniform(minimum, maximum)`:
 ```typescript
 import { BigFivePersonality, LifeStage } from "personalitygen";
 
+const rng = {
+  uniform(minimum: number, maximum: number): number {
+    return minimum + (maximum - minimum) * 0.5;
+  },
+};
 const personality = BigFivePersonality.random(LifeStage.Adult, { rng });
 console.log(personality.traitConfiguration);
 console.log(
@@ -84,6 +89,11 @@ side dominates. The canonical vector order is:
 ```typescript
 import { AdaptiveBifurcatedProfile } from "personalitygen";
 
+const rng = {
+  uniform(minimum: number, maximum: number): number {
+    return minimum + (maximum - minimum) * 0.5;
+  },
+};
 const profile = AdaptiveBifurcatedProfile.random({ rng });
 console.log(profile.vector);
 console.log(profile.dominantPoles(0.25));
@@ -96,8 +106,15 @@ save format already uses Big Five traits, but a gameplay system wants ABBF
 vectors.
 
 ```python
-from personalitygen import AdaptiveBifurcatedProfile, BigFiveTraitConfiguration
+import random
 
+from personalitygen import (
+    AdaptiveBifurcatedProfile,
+    BigFiveTraitConfiguration,
+    LifeStage,
+)
+
+rng = random.Random(23)
 traits = BigFiveTraitConfiguration.random(LifeStage.YOUNG_ADULT, rng=rng)
 profile = AdaptiveBifurcatedProfile.from_big_five(traits)
 
@@ -109,6 +126,17 @@ Projection is a stable generator heuristic documented in
 [`decisions/0002-adaptive-bifurcated-model.md`](decisions/0002-adaptive-bifurcated-model.md).
 
 ```typescript
+import {
+  AdaptiveBifurcatedProfile,
+  BigFiveTraitConfiguration,
+  LifeStage,
+} from "personalitygen";
+
+const rng = {
+  uniform(minimum: number, maximum: number): number {
+    return minimum + (maximum - minimum) * 0.5;
+  },
+};
 const traits = BigFiveTraitConfiguration.random(LifeStage.YoungAdult, { rng });
 const profile = AdaptiveBifurcatedProfile.fromBigFive(traits);
 

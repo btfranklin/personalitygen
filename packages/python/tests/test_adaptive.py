@@ -24,9 +24,6 @@ class MidpointRandom:
     def uniform(self, a: float, b: float) -> float:
         return (a + b) / 2.0
 
-    def gauss(self, mu: float, sigma: float) -> float:
-        raise AssertionError("gauss is not expected in this test")
-
 
 def test_adaptive_profile_accepts_signed_boundaries() -> None:
     profile = AdaptiveBifurcatedProfile(

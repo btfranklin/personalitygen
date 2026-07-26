@@ -3,7 +3,6 @@ import {
   CONFLICT_RESOLUTION_STYLES,
   type BigFiveConflictResolutionStyle as ConflictStyle,
   type LifeStage,
-  PRIORITY_LEVELS,
   type PriorityLevel as Priority,
   PriorityLevel,
 } from "./enums.js";
@@ -24,6 +23,13 @@ type TraitName =
   | "neuroticism";
 type TraitScores = Readonly<Record<TraitName, number>>;
 type StyleCoefficients = Readonly<Record<TraitName, number>>;
+const TRAIT_NAMES: readonly TraitName[] = Object.freeze([
+  "openness",
+  "conscientiousness",
+  "extraversion",
+  "agreeableness",
+  "neuroticism",
+]);
 
 export const CONFLICT_STYLE_COEFFICIENTS: Readonly<
   Record<ConflictStyle, StyleCoefficients>
@@ -106,51 +112,16 @@ export function conflictStyleWeights(
   configuration: BigFiveTraitConfiguration,
 ): Readonly<Record<ConflictStyle, number>> {
   const scores = traitScores(configuration);
-  const avoiding = CONFLICT_STYLE_COEFFICIENTS[BigFiveConflictResolutionStyle.Avoiding];
-  const obliging = CONFLICT_STYLE_COEFFICIENTS[BigFiveConflictResolutionStyle.Obliging];
-  const integrating =
-    CONFLICT_STYLE_COEFFICIENTS[BigFiveConflictResolutionStyle.Integrating];
-  const dominating =
-    CONFLICT_STYLE_COEFFICIENTS[BigFiveConflictResolutionStyle.Dominating];
-  const compromising =
-    CONFLICT_STYLE_COEFFICIENTS[BigFiveConflictResolutionStyle.Compromising];
-
-  return Object.freeze({
-    [BigFiveConflictResolutionStyle.Avoiding]: Math.max(
-      scores.neuroticism * avoiding.neuroticism +
-        scores.openness * avoiding.openness +
-        scores.agreeableness * avoiding.agreeableness +
-        scores.conscientiousness * avoiding.conscientiousness,
-      CONFLICT_MINIMUM_WEIGHT,
-    ),
-    [BigFiveConflictResolutionStyle.Obliging]: Math.max(
-      scores.neuroticism * obliging.neuroticism +
-        scores.extraversion * obliging.extraversion +
-        scores.openness * obliging.openness +
-        scores.agreeableness * obliging.agreeableness,
-      CONFLICT_MINIMUM_WEIGHT,
-    ),
-    [BigFiveConflictResolutionStyle.Integrating]: Math.max(
-      scores.openness * integrating.openness +
-        scores.agreeableness * integrating.agreeableness +
-        scores.conscientiousness * integrating.conscientiousness,
-      CONFLICT_MINIMUM_WEIGHT,
-    ),
-    [BigFiveConflictResolutionStyle.Dominating]: Math.max(
-      scores.neuroticism * dominating.neuroticism +
-        scores.extraversion * dominating.extraversion +
-        scores.openness * dominating.openness +
-        scores.agreeableness * dominating.agreeableness +
-        scores.conscientiousness * dominating.conscientiousness,
-      CONFLICT_MINIMUM_WEIGHT,
-    ),
-    [BigFiveConflictResolutionStyle.Compromising]: Math.max(
-      scores.neuroticism * compromising.neuroticism +
-        scores.extraversion * compromising.extraversion +
-        scores.conscientiousness * compromising.conscientiousness,
-      CONFLICT_MINIMUM_WEIGHT,
-    ),
-  });
+  const weights = {} as Record<ConflictStyle, number>;
+  for (const style of CONFLICT_RESOLUTION_STYLES) {
+    const coefficients = CONFLICT_STYLE_COEFFICIENTS[style];
+    const level = TRAIT_NAMES.reduce(
+      (total, traitName) => total + scores[traitName] * coefficients[traitName],
+      0,
+    );
+    weights[style] = Math.max(level, CONFLICT_MINIMUM_WEIGHT);
+  }
+  return Object.freeze(weights);
 }
 
 function weightedChoice(
@@ -172,7 +143,9 @@ function weightedChoice(
       return style;
     }
   }
-  return CONFLICT_RESOLUTION_STYLES[0] as ConflictStyle;
+  return CONFLICT_RESOLUTION_STYLES[
+    CONFLICT_RESOLUTION_STYLES.length - 1
+  ] as ConflictStyle;
 }
 
 const DEFAULT_RANDOM_SOURCE: RandomSource = Object.freeze({
@@ -230,8 +203,6 @@ export class BigFiveTraitConfiguration {
 
 export interface BigFiveConflictResolutionConfigurationOptions {
   readonly conflictResolutionStyle: ConflictStyle;
-  readonly concernForSelf: Priority;
-  readonly concernForOthers: Priority;
 }
 
 export class BigFiveConflictResolutionConfiguration {
@@ -245,19 +216,11 @@ export class BigFiveConflictResolutionConfiguration {
         `Unsupported conflict style: ${String(options.conflictResolutionStyle)}`,
       );
     }
-    if (!PRIORITY_LEVELS.includes(options.concernForSelf)) {
-      throw new TypeError(
-        `Unsupported priority level: ${String(options.concernForSelf)}`,
-      );
-    }
-    if (!PRIORITY_LEVELS.includes(options.concernForOthers)) {
-      throw new TypeError(
-        `Unsupported priority level: ${String(options.concernForOthers)}`,
-      );
-    }
+    const [concernForSelf, concernForOthers] =
+      CONFLICT_CONCERN_MAPPINGS[options.conflictResolutionStyle];
     this.conflictResolutionStyle = options.conflictResolutionStyle;
-    this.concernForSelf = options.concernForSelf;
-    this.concernForOthers = options.concernForOthers;
+    this.concernForSelf = concernForSelf;
+    this.concernForOthers = concernForOthers;
     Object.freeze(this);
   }
 
@@ -269,11 +232,8 @@ export class BigFiveConflictResolutionConfiguration {
       conflictStyleWeights(traitConfiguration),
       options.rng ?? DEFAULT_RANDOM_SOURCE,
     );
-    const [concernForSelf, concernForOthers] = CONFLICT_CONCERN_MAPPINGS[style];
     return new BigFiveConflictResolutionConfiguration({
       conflictResolutionStyle: style,
-      concernForSelf,
-      concernForOthers,
     });
   }
 }

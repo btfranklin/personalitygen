@@ -114,9 +114,13 @@ def test_typescript_metadata_matches_repository_policy() -> None:
     package = json.loads(
         (typescript_root / "package.json").read_text(encoding="utf-8")
     )
+    package_lock = json.loads(
+        (typescript_root / "package-lock.json").read_text(encoding="utf-8")
+    )
 
     assert package["name"] == "personalitygen"
-    assert package["version"] == "0.3.0"
+    assert package["version"] == package_lock["version"]
+    assert package["version"] == package_lock["packages"][""]["version"]
     assert "dependencies" not in package
     assert package["devDependencies"]["typescript"].startswith(">=7.")
     assert (typescript_root / "README.md").is_file()

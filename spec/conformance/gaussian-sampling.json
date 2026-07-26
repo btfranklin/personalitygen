@@ -62,6 +62,24 @@
       "maximum": 0.5,
       "uniformFraction": 0.3,
       "expected": 0.5
+    },
+    {
+      "name": "unit lower endpoint",
+      "mean": 0.85,
+      "standardDeviation": 0.16,
+      "minimum": 0.01,
+      "maximum": 1.0,
+      "uniformFraction": 0.0,
+      "expected": 0.01
+    },
+    {
+      "name": "unit upper endpoint",
+      "mean": 0.85,
+      "standardDeviation": 0.16,
+      "minimum": 0.01,
+      "maximum": 1.0,
+      "uniformFraction": 1.0,
+      "expected": 1.0
     }
   ]
 }

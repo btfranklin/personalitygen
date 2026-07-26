@@ -28,8 +28,9 @@ documentation agree.
 
 ## Randomness
 
-Random sampling uses an injectable source capable of drawing uniformly between
-two bounds. Implementations may adapt their ecosystem's native random source.
+Random sampling uses an injectable source capable of drawing a finite value
+uniformly between two inclusive bounds. Implementations reject values outside
+the requested bounds and may adapt their ecosystem's native random source.
 
 Life-stage components use inverse-CDF sampling from a normal distribution
 truncated to `0.01..1.0`. ABBF random profiles use the same approach with mean

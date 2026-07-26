@@ -4,6 +4,9 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+const packageMetadata = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
 const temporaryDirectory = mkdtempSync(join(tmpdir(), "personalitygen-npm-"));
 
 try {
@@ -18,7 +21,7 @@ try {
     : Object.values(packMetadata)[0];
   assert.ok(packed, "npm pack did not return package metadata");
   assert.equal(packed.name, "personalitygen");
-  assert.equal(packed.version, "0.3.0");
+  assert.equal(packed.version, packageMetadata.version);
 
   const paths = new Set(packed.files.map(({ path }) => path));
   for (const required of [

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import random
 
+import pytest
+
 from personalitygen.enums import LifeStage, PriorityLevel
 from personalitygen.personality import (
     BigFiveConflictResolutionConfiguration,
@@ -52,8 +54,15 @@ class SequenceRandom:
             raise AssertionError(f"Uniform value {value} not in {a}..{b}")
         return value
 
-    def gauss(self, mu: float, sigma: float) -> float:
-        raise AssertionError("gauss is not expected in this test")
+
+class UpperEndpointRandom:
+    def uniform(self, a: float, b: float) -> float:
+        return b
+
+
+class InvalidRandom:
+    def uniform(self, a: float, b: float) -> float:
+        return float("nan")
 
 
 def flat_trait_configuration(score: float) -> BigFiveTraitConfiguration:
@@ -104,6 +113,18 @@ def test_conflict_configuration_derives_concerns_for_every_style() -> None:
     ] == list(CONCERN_BY_STYLE.values())
 
 
+def test_conflict_configuration_derives_concerns_when_authored() -> None:
+    configurations = [
+        BigFiveConflictResolutionConfiguration(style)
+        for style in BigFiveConflictResolutionStyle
+    ]
+
+    assert [
+        (configuration.concern_for_self, configuration.concern_for_others)
+        for configuration in configurations
+    ] == list(CONCERN_BY_STYLE.values())
+
+
 def test_conflict_style_floors_negative_weights() -> None:
     # All maxed scores make DOMINATING negative and COMPROMISING zero.
     trait_configuration = flat_trait_configuration(1.0)
@@ -120,3 +141,23 @@ def test_conflict_style_floors_negative_weights() -> None:
         BigFiveConflictResolutionStyle.DOMINATING,
         BigFiveConflictResolutionStyle.COMPROMISING,
     ]
+
+
+def test_conflict_style_assigns_upper_endpoint_to_final_bucket() -> None:
+    trait_configuration = flat_trait_configuration(1.0)
+
+    assert BigFiveConflictResolutionStyle.random(
+        trait_configuration,
+        rng=UpperEndpointRandom(),
+    ) is BigFiveConflictResolutionStyle.COMPROMISING
+
+
+def test_conflict_style_rejects_invalid_uniform_draw() -> None:
+    with pytest.raises(
+        ValueError,
+        match="RandomSource.uniform returned a value out of range",
+    ):
+        BigFiveConflictResolutionStyle.random(
+            flat_trait_configuration(0.5),
+            rng=InvalidRandom(),
+        )

@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import math
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Self
 
@@ -25,8 +26,11 @@ def _weighted_choice(
 ) -> "BigFiveConflictResolutionStyle":
     if not weights:
         raise ValueError("weights must be non-empty")
-    if any(weight < 0.0 for weight in weights.values()):
-        raise ValueError("weights must be non-negative")
+    if any(
+        not math.isfinite(weight) or weight < 0.0
+        for weight in weights.values()
+    ):
+        raise ValueError("weights must be finite and non-negative")
     source = rng if rng is not None else random
     total = sum(weights.values())
     if total <= 0.0:
@@ -34,11 +38,17 @@ def _weighted_choice(
         total = float(len(weights))
 
     threshold = source.uniform(0.0, total)
+    if (
+        not math.isfinite(threshold)
+        or threshold < 0.0
+        or threshold > total
+    ):
+        raise ValueError("RandomSource.uniform returned a value out of range")
     for style, weight in weights.items():
         threshold -= weight
         if threshold <= 0.0:
             return style
-    return next(iter(weights))
+    return next(reversed(weights))
 
 
 class BigFiveConflictResolutionStyle(str, Enum):
@@ -169,50 +179,15 @@ def _conflict_style_weights(
         "agreeableness": trait_configuration.agreeableness.score,
         "neuroticism": trait_configuration.neuroticism.score,
     }
-    coefficients = _CONFLICT_STYLE_COEFFICIENTS
-    avoiding = coefficients[BigFiveConflictResolutionStyle.AVOIDING]
-    obliging = coefficients[BigFiveConflictResolutionStyle.OBLIGING]
-    integrating = coefficients[BigFiveConflictResolutionStyle.INTEGRATING]
-    dominating = coefficients[BigFiveConflictResolutionStyle.DOMINATING]
-    compromising = coefficients[BigFiveConflictResolutionStyle.COMPROMISING]
-    style_levels = {
-        BigFiveConflictResolutionStyle.AVOIDING: (
-            trait_scores["neuroticism"] * avoiding["neuroticism"]
-            + trait_scores["openness"] * avoiding["openness"]
-            + trait_scores["agreeableness"] * avoiding["agreeableness"]
-            + trait_scores["conscientiousness"]
-            * avoiding["conscientiousness"]
-        ),
-        BigFiveConflictResolutionStyle.OBLIGING: (
-            trait_scores["neuroticism"] * obliging["neuroticism"]
-            + trait_scores["extraversion"] * obliging["extraversion"]
-            + trait_scores["openness"] * obliging["openness"]
-            + trait_scores["agreeableness"] * obliging["agreeableness"]
-        ),
-        BigFiveConflictResolutionStyle.INTEGRATING: (
-            trait_scores["openness"] * integrating["openness"]
-            + trait_scores["agreeableness"] * integrating["agreeableness"]
-            + trait_scores["conscientiousness"]
-            * integrating["conscientiousness"]
-        ),
-        BigFiveConflictResolutionStyle.DOMINATING: (
-            trait_scores["neuroticism"] * dominating["neuroticism"]
-            + trait_scores["extraversion"] * dominating["extraversion"]
-            + trait_scores["openness"] * dominating["openness"]
-            + trait_scores["agreeableness"] * dominating["agreeableness"]
-            + trait_scores["conscientiousness"]
-            * dominating["conscientiousness"]
-        ),
-        BigFiveConflictResolutionStyle.COMPROMISING: (
-            trait_scores["neuroticism"] * compromising["neuroticism"]
-            + trait_scores["extraversion"] * compromising["extraversion"]
-            + trait_scores["conscientiousness"]
-            * compromising["conscientiousness"]
-        ),
-    }
     return {
-        style: max(level, _CONFLICT_MINIMUM_WEIGHT)
-        for style, level in style_levels.items()
+        style: max(
+            sum(
+                trait_scores[trait_name] * coefficient
+                for trait_name, coefficient in coefficients.items()
+            ),
+            _CONFLICT_MINIMUM_WEIGHT,
+        )
+        for style, coefficients in _CONFLICT_STYLE_COEFFICIENTS.items()
     }
 
 
@@ -260,8 +235,23 @@ _validate_style_concerns()
 @dataclass(frozen=True, slots=True)
 class BigFiveConflictResolutionConfiguration:
     conflict_resolution_style: BigFiveConflictResolutionStyle
-    concern_for_self: PriorityLevel
-    concern_for_others: PriorityLevel
+    concern_for_self: PriorityLevel = field(init=False)
+    concern_for_others: PriorityLevel = field(init=False)
+
+    def __post_init__(self) -> None:
+        if not isinstance(
+            self.conflict_resolution_style,
+            BigFiveConflictResolutionStyle,
+        ):
+            raise TypeError(
+                "conflict_resolution_style must be a "
+                "BigFiveConflictResolutionStyle"
+            )
+        concern_for_self, concern_for_others = _STYLE_TO_CONCERNS[
+            self.conflict_resolution_style
+        ]
+        object.__setattr__(self, "concern_for_self", concern_for_self)
+        object.__setattr__(self, "concern_for_others", concern_for_others)
 
     @classmethod
     def random(
@@ -273,12 +263,7 @@ class BigFiveConflictResolutionConfiguration:
         style = BigFiveConflictResolutionStyle.random(
             trait_configuration, rng=rng
         )
-        concern_for_self, concern_for_others = _STYLE_TO_CONCERNS[style]
-        return cls(
-            conflict_resolution_style=style,
-            concern_for_self=concern_for_self,
-            concern_for_others=concern_for_others,
-        )
+        return cls(conflict_resolution_style=style)
 
 
 @dataclass(frozen=True, slots=True)

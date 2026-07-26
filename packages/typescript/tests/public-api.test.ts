@@ -4,9 +4,12 @@ import {
   AdaptiveBifurcatedAxis,
   AdaptiveBifurcatedDomain,
   AdaptiveBifurcatedPole,
+  BigFiveConflictResolutionConfiguration,
+  BigFiveConflictResolutionStyle,
   BigFiveOpenness,
   BigFivePersonality,
   LifeStage,
+  PriorityLevel,
 } from "../dist/index.js";
 
 test("public value objects are immutable", () => {
@@ -30,6 +33,30 @@ test("random personality generation uses the supplied random source", () => {
   assert.ok(Object.isFrozen(personality));
   assert.ok(Object.isFrozen(personality.traitConfiguration));
   assert.ok(Object.isFrozen(personality.conflictResolutionConfiguration));
+});
+
+test("conflict concerns are derived from the authored style", () => {
+  const conflict = new BigFiveConflictResolutionConfiguration({
+    conflictResolutionStyle: BigFiveConflictResolutionStyle.Avoiding,
+  });
+
+  assert.equal(conflict.concernForSelf, PriorityLevel.Low);
+  assert.equal(conflict.concernForOthers, PriorityLevel.Low);
+  assert.ok(Object.isFrozen(conflict));
+});
+
+test("random generation accepts an inclusive upper endpoint", () => {
+  const openness = BigFiveOpenness.random(LifeStage.Child, {
+    rng: {
+      uniform(_minimum, maximum) {
+        return maximum;
+      },
+    },
+  });
+
+  assert.equal(openness.aestheticSensitivityScore, 1);
+  assert.equal(openness.creativeImaginationScore, 1);
+  assert.equal(openness.intellectualCuriosityScore, 1);
 });
 
 test("malformed categorical and numeric inputs use idiomatic errors", () => {
@@ -62,6 +89,27 @@ test("malformed categorical and numeric inputs use idiomatic errors", () => {
           },
         },
       }),
+    RangeError,
+  );
+  const midpointPersonality = BigFivePersonality.random(LifeStage.Adult, {
+    rng: {
+      uniform(minimum, maximum) {
+        return minimum + (maximum - minimum) * 0.5;
+      },
+    },
+  });
+  assert.throws(
+    () =>
+      BigFiveConflictResolutionConfiguration.random(
+        midpointPersonality.traitConfiguration,
+        {
+          rng: {
+            uniform() {
+              return Number.POSITIVE_INFINITY;
+            },
+          },
+        },
+      ),
     RangeError,
   );
 });

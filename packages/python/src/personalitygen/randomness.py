@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import random
 import statistics
 from typing import Protocol
@@ -12,8 +13,6 @@ _CDF_EPSILON = 1e-12
 
 class RandomSource(Protocol):
     """Minimal interface needed for deterministic sampling."""
-
-    def gauss(self, mu: float, sigma: float) -> float: ...
 
     def uniform(self, a: float, b: float) -> float: ...
 
@@ -31,6 +30,9 @@ def random_gaussian(
     rng: RandomSource | None = None,
 ) -> float:
     """Draw a truncated Gaussian sample within the provided bounds."""
+    parameters = (mean, stddev, min_value, max_value)
+    if not all(math.isfinite(value) for value in parameters):
+        raise ValueError("Gaussian parameters must be finite")
     if stddev <= 0:
         raise ValueError("stddev must be positive")
     if min_value > max_value:
@@ -48,5 +50,17 @@ def random_gaussian(
     if lower >= upper:
         return max(min_value, min(max_value, mean))
 
-    u = source.uniform(lower, upper)
-    return distribution.inv_cdf(u)
+    probability = source.uniform(lower, upper)
+    if (
+        not math.isfinite(probability)
+        or probability < lower
+        or probability > upper
+    ):
+        raise ValueError("RandomSource.uniform returned a value out of range")
+    if probability == lower:
+        return min_value
+    if probability == upper:
+        return max_value
+
+    sample = distribution.inv_cdf(probability)
+    return max(min_value, min(max_value, sample))

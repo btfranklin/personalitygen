@@ -12,16 +12,10 @@ class FractionalRandom:
         self.calls.append((a, b))
         return a + ((b - a) * self.fraction)
 
-    def gauss(self, mu: float, sigma: float) -> float:
-        raise AssertionError("gauss is not expected in this test")
-
 
 class MidpointRandom:
     def uniform(self, a: float, b: float) -> float:
         return (a + b) / 2.0
-
-    def gauss(self, mu: float, sigma: float) -> float:
-        raise AssertionError("gauss is not expected in this test")
 
 
 def test_random_gaussian_returns_value_within_bounds() -> None:
@@ -63,6 +57,25 @@ def test_random_gaussian_uses_truncated_cdf_bounds() -> None:
     assert len(rng.calls) == 1
     lower, upper = rng.calls[0]
     assert 0.0 < lower < upper < 1.0
+
+
+@pytest.mark.parametrize(
+    ("fraction", "expected"),
+    [(0.0, 0.01), (1.0, 1.0)],
+)
+def test_random_gaussian_accepts_uniform_endpoints(
+    fraction: float,
+    expected: float,
+) -> None:
+    value = random_gaussian(
+        mean=0.85,
+        stddev=0.16,
+        min_value=0.01,
+        max_value=1.0,
+        rng=FractionalRandom(fraction),
+    )
+
+    assert value == pytest.approx(expected, abs=1e-6)
 
 
 def test_random_gaussian_clamps_when_bounds_collapse() -> None:
@@ -112,4 +125,45 @@ def test_random_gaussian_rejects_invalid_bounds() -> None:
             stddev=0.1,
             min_value=0.9,
             max_value=0.1,
+        )
+
+
+@pytest.mark.parametrize("fraction", [float("nan"), -0.01, 1.01])
+def test_random_gaussian_rejects_invalid_uniform_draws(
+    fraction: float,
+) -> None:
+    with pytest.raises(
+        ValueError,
+        match="RandomSource.uniform returned a value out of range",
+    ):
+        random_gaussian(
+            mean=0.5,
+            stddev=0.1,
+            min_value=0.0,
+            max_value=1.0,
+            rng=FractionalRandom(fraction),
+        )
+
+
+@pytest.mark.parametrize(
+    ("mean", "stddev", "min_value", "max_value"),
+    [
+        (float("nan"), 0.1, 0.0, 1.0),
+        (0.5, float("inf"), 0.0, 1.0),
+        (0.5, 0.1, float("-inf"), 1.0),
+        (0.5, 0.1, 0.0, float("nan")),
+    ],
+)
+def test_random_gaussian_rejects_non_finite_parameters(
+    mean: float,
+    stddev: float,
+    min_value: float,
+    max_value: float,
+) -> None:
+    with pytest.raises(ValueError, match="Gaussian parameters must be finite"):
+        random_gaussian(
+            mean=mean,
+            stddev=stddev,
+            min_value=min_value,
+            max_value=max_value,
         )
