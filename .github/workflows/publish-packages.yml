@@ -9,6 +9,10 @@ on:
                 description: Existing release tag to validate and optionally publish
                 required: true
                 type: string
+            artifact_run_id:
+                description: Prior validated run ID to reuse without rebuilding
+                required: false
+                type: string
             publish_python:
                 description: Publish the validated Python artifacts to PyPI
                 required: true
@@ -21,6 +25,7 @@ on:
                 type: boolean
 
 permissions:
+    actions: read
     contents: read
 
 env:
@@ -28,6 +33,7 @@ env:
 
 jobs:
     python-preflight:
+        if: inputs.artifact_run_id == ''
         runs-on: ubuntu-latest
 
         steps:
@@ -71,6 +77,7 @@ jobs:
                   if-no-files-found: error
 
     typescript-preflight:
+        if: inputs.artifact_run_id == ''
         runs-on: ubuntu-latest
 
         defaults:
@@ -103,11 +110,21 @@ jobs:
                   if-no-files-found: error
 
     publish-python:
-        if: github.event_name == 'release' || inputs.publish_python
+        if: >-
+            always() &&
+            (github.event_name == 'release' || inputs.publish_python) &&
+            (
+              inputs.artifact_run_id != '' ||
+              (
+                needs.python-preflight.result == 'success' &&
+                needs.typescript-preflight.result == 'success'
+              )
+            )
         needs: [python-preflight, typescript-preflight]
         runs-on: ubuntu-latest
         environment: release
         permissions:
+            actions: read
             contents: read
             id-token: write
 
@@ -117,17 +134,30 @@ jobs:
               with:
                   name: python-distributions
                   path: python-distributions
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
+                  run-id: ${{ inputs.artifact_run_id || github.run_id }}
             - name: Publish Python artifacts with Trusted Publishing
               uses: pypa/gh-action-pypi-publish@release/v1
               with:
                   packages-dir: python-distributions/
 
     publish-typescript:
-        if: github.event_name == 'release' || inputs.publish_typescript
+        if: >-
+            always() &&
+            (github.event_name == 'release' || inputs.publish_typescript) &&
+            (
+              inputs.artifact_run_id != '' ||
+              (
+                needs.python-preflight.result == 'success' &&
+                needs.typescript-preflight.result == 'success'
+              )
+            )
         needs: [python-preflight, typescript-preflight]
         runs-on: ubuntu-latest
         environment: release
         permissions:
+            actions: read
             contents: read
             id-token: write
 
@@ -143,8 +173,11 @@ jobs:
               with:
                   name: npm-package
                   path: npm-package
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
+                  run-id: ${{ inputs.artifact_run_id || github.run_id }}
             - name: Publish npm artifact with Trusted Publishing
               run: |
                   package="npm-package/personalitygen-${RELEASE_TAG#v}.tgz"
                   test -f "$package"
-                  npm publish "$package" --provenance --access public
+                  npm publish "./$package" --provenance --access public

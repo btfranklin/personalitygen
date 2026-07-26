@@ -127,3 +127,8 @@ artifact. Correct only the credential or registry-availability problem, then
 use GitHub's **Re-run failed jobs** on that same workflow run. The retried
 publisher downloads the original successful preflight artifact. A new code
 change requires a new version and tag.
+
+If the publisher workflow itself must be corrected, dispatch the corrected
+workflow with the original tag, the failed registry's publish boolean, and the
+original validated run's ID as `artifact_run_id`. This skips both preflights
+and downloads the preserved artifact from that run rather than rebuilding it.
