@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 
 from personalitygen.enums import LifeStage
-from personalitygen.personality import BigFiveTraitConfiguration
+from personalitygen.personality import BigFiveTraits
 from personalitygen.traits import (
     BigFiveAgreeableness,
     BigFiveConscientiousness,
@@ -179,10 +179,10 @@ def test_unknown_life_stage_is_rejected(spec: TraitSpec) -> None:
 
 
 @pytest.mark.parametrize("life_stage", list(LifeStage))
-def test_trait_configuration_samples_all_big_five_traits(
+def test_traits_sample_all_big_five_traits(
     life_stage: LifeStage,
 ) -> None:
-    traits = BigFiveTraitConfiguration.random(
+    traits = BigFiveTraits.random(
         life_stage, rng=MedianRandom()
     )
 
@@ -203,11 +203,11 @@ def test_trait_configuration_samples_all_big_five_traits(
     )
 
 
-def test_trait_configuration_is_deterministic_for_seed() -> None:
+def test_traits_are_deterministic_for_seed() -> None:
     rng_a = random.Random(123)
     rng_b = random.Random(123)
 
-    traits_a = BigFiveTraitConfiguration.random(LifeStage.ADULT, rng=rng_a)
-    traits_b = BigFiveTraitConfiguration.random(LifeStage.ADULT, rng=rng_b)
+    traits_a = BigFiveTraits.random(LifeStage.ADULT, rng=rng_a)
+    traits_b = BigFiveTraits.random(LifeStage.ADULT, rng=rng_b)
 
     assert traits_a == traits_b

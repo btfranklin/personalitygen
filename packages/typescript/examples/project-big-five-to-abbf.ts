@@ -5,10 +5,10 @@ import {
   BigFiveExtraversion,
   BigFiveNeuroticism,
   BigFiveOpenness,
-  BigFiveTraitConfiguration,
+  BigFiveTraits,
 } from "../dist/index.js";
 
-const traits = new BigFiveTraitConfiguration({
+const traits = new BigFiveTraits({
   openness: new BigFiveOpenness({
     aestheticSensitivityScore: 0.75,
     creativeImaginationScore: 0.7,

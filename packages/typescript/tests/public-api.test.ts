@@ -4,7 +4,7 @@ import {
   AdaptiveBifurcatedAxis,
   AdaptiveBifurcatedDomain,
   AdaptiveBifurcatedPole,
-  BigFiveConflictResolutionConfiguration,
+  BigFiveConflictResolution,
   BigFiveConflictResolutionStyle,
   BigFiveOpenness,
   BigFivePersonality,
@@ -31,15 +31,16 @@ test("random personality generation uses the supplied random source", () => {
     },
   });
   assert.ok(Object.isFrozen(personality));
-  assert.ok(Object.isFrozen(personality.traitConfiguration));
-  assert.ok(Object.isFrozen(personality.conflictResolutionConfiguration));
+  assert.ok(Object.isFrozen(personality.traits));
+  assert.ok(Object.isFrozen(personality.conflictResolution));
 });
 
 test("conflict concerns are derived from the authored style", () => {
-  const conflict = new BigFiveConflictResolutionConfiguration({
-    conflictResolutionStyle: BigFiveConflictResolutionStyle.Avoiding,
+  const conflict = new BigFiveConflictResolution({
+    style: BigFiveConflictResolutionStyle.Avoiding,
   });
 
+  assert.equal(conflict.style, BigFiveConflictResolutionStyle.Avoiding);
   assert.equal(conflict.concernForSelf, PriorityLevel.Low);
   assert.equal(conflict.concernForOthers, PriorityLevel.Low);
   assert.ok(Object.isFrozen(conflict));
@@ -100,16 +101,13 @@ test("malformed categorical and numeric inputs use idiomatic errors", () => {
   });
   assert.throws(
     () =>
-      BigFiveConflictResolutionConfiguration.random(
-        midpointPersonality.traitConfiguration,
-        {
-          rng: {
-            uniform() {
-              return Number.POSITIVE_INFINITY;
-            },
+      BigFiveConflictResolution.random(midpointPersonality.traits, {
+        rng: {
+          uniform() {
+            return Number.POSITIVE_INFINITY;
           },
         },
-      ),
+      }),
     RangeError,
   );
 });

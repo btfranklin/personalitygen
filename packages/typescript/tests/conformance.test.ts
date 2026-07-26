@@ -19,13 +19,13 @@ import {
 import {
   AdaptiveBifurcatedProfile,
   BigFiveAgreeableness,
-  BigFiveConflictResolutionConfiguration,
+  BigFiveConflictResolution,
   BigFiveConscientiousness,
   BigFiveExtraversion,
   BigFiveNeuroticism,
   BigFiveOpenness,
-  BigFiveTraitConfiguration,
-  type LifeStageValue,
+  BigFiveTraits,
+  type LifeStage,
   type RandomSource,
 } from "../dist/index.js";
 import {
@@ -151,7 +151,7 @@ function fractionSource(fractions: readonly number[]): RandomSource {
   };
 }
 
-function traitConfiguration(
+function bigFiveTraits(
   scores: Readonly<{
     openness: number;
     conscientiousness: number;
@@ -159,8 +159,8 @@ function traitConfiguration(
     agreeableness: number;
     neuroticism: number;
   }>,
-): BigFiveTraitConfiguration {
-  return new BigFiveTraitConfiguration({
+): BigFiveTraits {
+  return new BigFiveTraits({
     openness: new BigFiveOpenness({
       aestheticSensitivityScore: scores.openness,
       creativeImaginationScore: scores.openness,
@@ -374,13 +374,13 @@ test("truncated Gaussian fixtures", () => {
 test("life-stage generation fixtures", () => {
   const fixtures = loadJson<{
     readonly cases: readonly {
-      readonly lifeStage: LifeStageValue;
+      readonly lifeStage: LifeStage;
       readonly uniformFractions: readonly number[];
       readonly expected: Readonly<Record<string, readonly number[]>>;
     }[];
   }>(`conformance/${CONFORMANCE_FIXTURES.lifeStageSampling}`);
   for (const fixture of fixtures.cases) {
-    const traits = BigFiveTraitConfiguration.random(fixture.lifeStage, {
+    const traits = BigFiveTraits.random(fixture.lifeStage, {
       rng: fractionSource(fixture.uniformFractions),
     });
     const actual = Object.fromEntries(
@@ -431,7 +431,7 @@ test("weighted conflict selection fixtures", () => {
     }[];
   }>(`conformance/${CONFORMANCE_FIXTURES.conflictResolution}`);
   for (const fixture of fixtures.cases) {
-    const traits = traitConfiguration(fixture.traits);
+    const traits = bigFiveTraits(fixture.traits);
     const weights = conflictStyleWeights(traits);
     for (const [style, expected] of Object.entries(fixture.weights)) {
       assertClose(
@@ -442,9 +442,9 @@ test("weighted conflict selection fixtures", () => {
     }
     for (const selection of fixture.selections) {
       assert.equal(
-        BigFiveConflictResolutionConfiguration.random(traits, {
+        BigFiveConflictResolution.random(traits, {
           rng: fractionSource([selection.uniformFraction]),
-        }).conflictResolutionStyle,
+        }).style,
         selection.expected,
       );
     }
@@ -477,7 +477,7 @@ test("ABBF projection, poles, dot products, and cosine fixtures", () => {
   }>(`conformance/${CONFORMANCE_FIXTURES.adaptive}`);
   for (const fixture of fixtures.projectionCases) {
     const actual = AdaptiveBifurcatedProfile.fromBigFive(
-      traitConfiguration(fixture.bigFive),
+      bigFiveTraits(fixture.bigFive),
     ).vector;
     actual.forEach((value, index) => {
       assertClose(value, fixture.expected[index] as number, arithmeticTolerance);

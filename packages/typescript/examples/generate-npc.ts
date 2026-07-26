@@ -5,11 +5,11 @@ import {
 } from "../dist/index.js";
 
 const personality = BigFivePersonality.random(LifeStage.Adult);
-const adaptive = AdaptiveBifurcatedProfile.fromBigFive(personality.traitConfiguration);
-const conflict = personality.conflictResolutionConfiguration;
+const adaptive = AdaptiveBifurcatedProfile.fromBigFive(personality.traits);
+const conflict = personality.conflictResolution;
 
 console.log("NPC: Quartermaster Ilya");
-console.log(`Conflict style: ${conflict.conflictResolutionStyle}`);
+console.log(`Conflict style: ${conflict.style}`);
 console.log(
   `Concern priorities: self=${conflict.concernForSelf}, others=${conflict.concernForOthers}`,
 );

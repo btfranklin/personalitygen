@@ -18,7 +18,7 @@ from personalitygen._scoring import (
 from personalitygen.randomness import RandomSource, random_gaussian
 
 if TYPE_CHECKING:
-    from personalitygen.personality import BigFiveTraitConfiguration
+    from personalitygen.personality import BigFiveTraits
 
 
 class AdaptiveBifurcatedDomain(str, Enum):
@@ -162,8 +162,8 @@ class AdaptiveBifurcatedProfile:
         )
 
     @classmethod
-    def from_big_five(cls, traits: BigFiveTraitConfiguration) -> Self:
-        """Project a Big Five trait configuration into an ABBF profile."""
+    def from_big_five(cls, traits: BigFiveTraits) -> Self:
+        """Project Big Five traits into an ABBF profile."""
 
         trait_scores = {
             "openness": unit_to_signed(traits.openness.score),

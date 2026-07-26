@@ -6,23 +6,18 @@ export {
 } from "./adaptive.js";
 export {
   AdaptiveBifurcatedDomain,
-  type AdaptiveBifurcatedDomain as AdaptiveBifurcatedDomainValue,
   AdaptiveBifurcatedPole,
-  type AdaptiveBifurcatedPole as AdaptiveBifurcatedPoleValue,
   BigFiveConflictResolutionStyle,
-  type BigFiveConflictResolutionStyle as BigFiveConflictResolutionStyleValue,
   LifeStage,
-  type LifeStage as LifeStageValue,
   PriorityLevel,
-  type PriorityLevel as PriorityLevelValue,
 } from "./enums.js";
 export {
-  BigFiveConflictResolutionConfiguration,
-  type BigFiveConflictResolutionConfigurationOptions,
+  BigFiveConflictResolution,
+  type BigFiveConflictResolutionOptions,
   BigFivePersonality,
   type BigFivePersonalityOptions,
-  BigFiveTraitConfiguration,
-  type BigFiveTraitConfigurationOptions,
+  BigFiveTraits,
+  type BigFiveTraitsOptions,
 } from "./personality.js";
 export type { RandomOptions, RandomSource } from "./randomness.js";
 export {

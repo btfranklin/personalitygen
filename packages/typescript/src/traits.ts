@@ -1,9 +1,5 @@
 import { TRAIT_SAMPLE_MIN, UNIT_RANGE_MAX } from "./constants.js";
-import {
-  assertLifeStage,
-  LifeStage,
-  type LifeStage as LifeStageValue,
-} from "./enums.js";
+import { assertLifeStage, LifeStage } from "./enums.js";
 import { type RandomOptions, type RandomSource, randomGaussian } from "./randomness.js";
 import { componentAverageScore } from "./scoring.js";
 
@@ -11,7 +7,7 @@ type TraitMeans = readonly [number, number, number];
 
 interface TraitSamplingConfiguration {
   readonly standardDeviation: number;
-  readonly means: Readonly<Record<LifeStageValue, TraitMeans>>;
+  readonly means: Readonly<Record<LifeStage, TraitMeans>>;
 }
 
 function traitMeans(first: number, second: number, third: number): TraitMeans {
@@ -19,7 +15,7 @@ function traitMeans(first: number, second: number, third: number): TraitMeans {
 }
 
 function sampleTrait(
-  lifeStage: LifeStageValue,
+  lifeStage: LifeStage,
   configuration: TraitSamplingConfiguration,
   rng?: RandomSource,
 ): TraitMeans {
@@ -117,10 +113,7 @@ export class BigFiveOpenness {
     Object.freeze(this);
   }
 
-  static random(
-    lifeStage: LifeStageValue,
-    options: RandomOptions = {},
-  ): BigFiveOpenness {
+  static random(lifeStage: LifeStage, options: RandomOptions = {}): BigFiveOpenness {
     const [aestheticSensitivity, creativeImagination, intellectualCuriosity] =
       sampleTrait(lifeStage, TRAIT_SAMPLING_CONFIGURATIONS.openness, options.rng);
     return new BigFiveOpenness({
@@ -156,7 +149,7 @@ export class BigFiveConscientiousness {
   }
 
   static random(
-    lifeStage: LifeStageValue,
+    lifeStage: LifeStage,
     options: RandomOptions = {},
   ): BigFiveConscientiousness {
     const [organization, responsibility, productivity] = sampleTrait(
@@ -197,7 +190,7 @@ export class BigFiveExtraversion {
   }
 
   static random(
-    lifeStage: LifeStageValue,
+    lifeStage: LifeStage,
     options: RandomOptions = {},
   ): BigFiveExtraversion {
     const [assertiveness, sociability, energyLevel] = sampleTrait(
@@ -238,7 +231,7 @@ export class BigFiveAgreeableness {
   }
 
   static random(
-    lifeStage: LifeStageValue,
+    lifeStage: LifeStage,
     options: RandomOptions = {},
   ): BigFiveAgreeableness {
     const [compassion, respectfulness, trust] = sampleTrait(
@@ -278,10 +271,7 @@ export class BigFiveNeuroticism {
     Object.freeze(this);
   }
 
-  static random(
-    lifeStage: LifeStageValue,
-    options: RandomOptions = {},
-  ): BigFiveNeuroticism {
+  static random(lifeStage: LifeStage, options: RandomOptions = {}): BigFiveNeuroticism {
     const [anxiety, emotionalVolatility, depression] = sampleTrait(
       lifeStage,
       TRAIT_SAMPLING_CONFIGURATIONS.neuroticism,

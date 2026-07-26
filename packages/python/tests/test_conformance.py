@@ -15,7 +15,7 @@ from personalitygen import (
     BigFiveExtraversion,
     BigFiveNeuroticism,
     BigFiveOpenness,
-    BigFiveTraitConfiguration,
+    BigFiveTraits,
     LifeStage,
     PriorityLevel,
 )
@@ -80,8 +80,8 @@ class FractionRandom:
         return minimum + ((maximum - minimum) * fraction)
 
 
-def flat_traits(scores: dict[str, float]) -> BigFiveTraitConfiguration:
-    return BigFiveTraitConfiguration(
+def flat_traits(scores: dict[str, float]) -> BigFiveTraits:
+    return BigFiveTraits(
         openness=BigFiveOpenness(*(scores["openness"],) * 3),
         conscientiousness=BigFiveConscientiousness(
             *(scores["conscientiousness"],) * 3
@@ -93,7 +93,7 @@ def flat_traits(scores: dict[str, float]) -> BigFiveTraitConfiguration:
 
 
 def trait_components(
-    traits: BigFiveTraitConfiguration,
+    traits: BigFiveTraits,
 ) -> dict[str, tuple[float, float, float]]:
     return {
         "openness": (
@@ -265,7 +265,7 @@ def test_gaussian_sampling_conformance() -> None:
 def test_life_stage_sampling_conformance() -> None:
     fixture = load_json(CONFORMANCE_ROOT / "life-stage-sampling.json")
     for case in fixture["cases"]:
-        traits = BigFiveTraitConfiguration.random(
+        traits = BigFiveTraits.random(
             LifeStage(case["lifeStage"]),
             rng=FractionRandom(*case["uniformFractions"]),
         )

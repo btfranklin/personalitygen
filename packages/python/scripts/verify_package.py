@@ -99,13 +99,13 @@ def verify_isolated_install(wheel: Path) -> None:
         smoke_test = """
 from personalitygen import (
     AdaptiveBifurcatedProfile,
-    BigFiveConflictResolutionConfiguration,
+    BigFiveConflictResolution,
     BigFiveConflictResolutionStyle,
     PriorityLevel,
 )
 
-conflict = BigFiveConflictResolutionConfiguration(
-    BigFiveConflictResolutionStyle.AVOIDING
+conflict = BigFiveConflictResolution(
+    style=BigFiveConflictResolutionStyle.AVOIDING
 )
 assert conflict.concern_for_self is PriorityLevel.LOW
 assert len(AdaptiveBifurcatedProfile.random().vector) == 5

@@ -98,20 +98,20 @@ export const CONFLICT_CONCERN_MAPPINGS: Readonly<
   ] as const),
 });
 
-function traitScores(configuration: BigFiveTraitConfiguration): TraitScores {
+function traitScores(traits: BigFiveTraits): TraitScores {
   return {
-    openness: configuration.openness.score,
-    conscientiousness: configuration.conscientiousness.score,
-    extraversion: configuration.extraversion.score,
-    agreeableness: configuration.agreeableness.score,
-    neuroticism: configuration.neuroticism.score,
+    openness: traits.openness.score,
+    conscientiousness: traits.conscientiousness.score,
+    extraversion: traits.extraversion.score,
+    agreeableness: traits.agreeableness.score,
+    neuroticism: traits.neuroticism.score,
   };
 }
 
 export function conflictStyleWeights(
-  configuration: BigFiveTraitConfiguration,
+  traits: BigFiveTraits,
 ): Readonly<Record<ConflictStyle, number>> {
-  const scores = traitScores(configuration);
+  const scores = traitScores(traits);
   const weights = {} as Record<ConflictStyle, number>;
   for (const style of CONFLICT_RESOLUTION_STYLES) {
     const coefficients = CONFLICT_STYLE_COEFFICIENTS[style];
@@ -154,7 +154,7 @@ const DEFAULT_RANDOM_SOURCE: RandomSource = Object.freeze({
   },
 });
 
-export interface BigFiveTraitConfigurationOptions {
+export interface BigFiveTraitsOptions {
   readonly openness: BigFiveOpenness;
   readonly conscientiousness: BigFiveConscientiousness;
   readonly extraversion: BigFiveExtraversion;
@@ -162,14 +162,14 @@ export interface BigFiveTraitConfigurationOptions {
   readonly neuroticism: BigFiveNeuroticism;
 }
 
-export class BigFiveTraitConfiguration {
+export class BigFiveTraits {
   readonly openness: BigFiveOpenness;
   readonly conscientiousness: BigFiveConscientiousness;
   readonly extraversion: BigFiveExtraversion;
   readonly agreeableness: BigFiveAgreeableness;
   readonly neuroticism: BigFiveNeuroticism;
 
-  constructor(options: BigFiveTraitConfigurationOptions) {
+  constructor(options: BigFiveTraitsOptions) {
     if (
       !(options.openness instanceof BigFiveOpenness) ||
       !(options.conscientiousness instanceof BigFiveConscientiousness) ||
@@ -177,7 +177,7 @@ export class BigFiveTraitConfiguration {
       !(options.agreeableness instanceof BigFiveAgreeableness) ||
       !(options.neuroticism instanceof BigFiveNeuroticism)
     ) {
-      throw new TypeError("Trait configuration values must be Big Five trait objects.");
+      throw new TypeError("Big Five traits must be Big Five trait objects.");
     }
     this.openness = options.openness;
     this.conscientiousness = options.conscientiousness;
@@ -187,11 +187,8 @@ export class BigFiveTraitConfiguration {
     Object.freeze(this);
   }
 
-  static random(
-    lifeStage: LifeStage,
-    options: RandomOptions = {},
-  ): BigFiveTraitConfiguration {
-    return new BigFiveTraitConfiguration({
+  static random(lifeStage: LifeStage, options: RandomOptions = {}): BigFiveTraits {
+    return new BigFiveTraits({
       openness: BigFiveOpenness.random(lifeStage, options),
       conscientiousness: BigFiveConscientiousness.random(lifeStage, options),
       extraversion: BigFiveExtraversion.random(lifeStage, options),
@@ -201,79 +198,66 @@ export class BigFiveTraitConfiguration {
   }
 }
 
-export interface BigFiveConflictResolutionConfigurationOptions {
-  readonly conflictResolutionStyle: ConflictStyle;
+export interface BigFiveConflictResolutionOptions {
+  readonly style: ConflictStyle;
 }
 
-export class BigFiveConflictResolutionConfiguration {
-  readonly conflictResolutionStyle: ConflictStyle;
+export class BigFiveConflictResolution {
+  readonly style: ConflictStyle;
   readonly concernForSelf: Priority;
   readonly concernForOthers: Priority;
 
-  constructor(options: BigFiveConflictResolutionConfigurationOptions) {
-    if (!CONFLICT_RESOLUTION_STYLES.includes(options.conflictResolutionStyle)) {
-      throw new TypeError(
-        `Unsupported conflict style: ${String(options.conflictResolutionStyle)}`,
-      );
+  constructor(options: BigFiveConflictResolutionOptions) {
+    if (!CONFLICT_RESOLUTION_STYLES.includes(options.style)) {
+      throw new TypeError(`Unsupported conflict style: ${String(options.style)}`);
     }
-    const [concernForSelf, concernForOthers] =
-      CONFLICT_CONCERN_MAPPINGS[options.conflictResolutionStyle];
-    this.conflictResolutionStyle = options.conflictResolutionStyle;
+    const [concernForSelf, concernForOthers] = CONFLICT_CONCERN_MAPPINGS[options.style];
+    this.style = options.style;
     this.concernForSelf = concernForSelf;
     this.concernForOthers = concernForOthers;
     Object.freeze(this);
   }
 
   static random(
-    traitConfiguration: BigFiveTraitConfiguration,
+    traits: BigFiveTraits,
     options: RandomOptions = {},
-  ): BigFiveConflictResolutionConfiguration {
+  ): BigFiveConflictResolution {
     const style = weightedChoice(
-      conflictStyleWeights(traitConfiguration),
+      conflictStyleWeights(traits),
       options.rng ?? DEFAULT_RANDOM_SOURCE,
     );
-    return new BigFiveConflictResolutionConfiguration({
-      conflictResolutionStyle: style,
+    return new BigFiveConflictResolution({
+      style,
     });
   }
 }
 
 export interface BigFivePersonalityOptions {
-  readonly traitConfiguration: BigFiveTraitConfiguration;
-  readonly conflictResolutionConfiguration: BigFiveConflictResolutionConfiguration;
+  readonly traits: BigFiveTraits;
+  readonly conflictResolution: BigFiveConflictResolution;
 }
 
 export class BigFivePersonality {
-  readonly traitConfiguration: BigFiveTraitConfiguration;
-  readonly conflictResolutionConfiguration: BigFiveConflictResolutionConfiguration;
+  readonly traits: BigFiveTraits;
+  readonly conflictResolution: BigFiveConflictResolution;
 
   constructor(options: BigFivePersonalityOptions) {
-    if (!(options.traitConfiguration instanceof BigFiveTraitConfiguration)) {
-      throw new TypeError("traitConfiguration must be a BigFiveTraitConfiguration.");
+    if (!(options.traits instanceof BigFiveTraits)) {
+      throw new TypeError("traits must be BigFiveTraits.");
     }
-    if (
-      !(
-        options.conflictResolutionConfiguration instanceof
-        BigFiveConflictResolutionConfiguration
-      )
-    ) {
-      throw new TypeError(
-        "conflictResolutionConfiguration must be a BigFiveConflictResolutionConfiguration.",
-      );
+    if (!(options.conflictResolution instanceof BigFiveConflictResolution)) {
+      throw new TypeError("conflictResolution must be a BigFiveConflictResolution.");
     }
-    this.traitConfiguration = options.traitConfiguration;
-    this.conflictResolutionConfiguration = options.conflictResolutionConfiguration;
+    this.traits = options.traits;
+    this.conflictResolution = options.conflictResolution;
     Object.freeze(this);
   }
 
   static random(lifeStage: LifeStage, options: RandomOptions = {}): BigFivePersonality {
-    const traitConfiguration = BigFiveTraitConfiguration.random(lifeStage, options);
+    const traits = BigFiveTraits.random(lifeStage, options);
     return new BigFivePersonality({
-      traitConfiguration,
-      conflictResolutionConfiguration: BigFiveConflictResolutionConfiguration.random(
-        traitConfiguration,
-        options,
-      ),
+      traits,
+      conflictResolution: BigFiveConflictResolution.random(traits, options),
     });
   }
 }

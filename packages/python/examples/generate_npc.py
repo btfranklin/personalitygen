@@ -24,12 +24,12 @@ def main() -> None:
     rng = random.Random(7)
     personality = BigFivePersonality.random(LifeStage.ADULT, rng=rng)
     abb_five = AdaptiveBifurcatedProfile.from_big_five(
-        personality.trait_configuration
+        personality.traits
     )
-    conflict = personality.conflict_resolution_configuration
+    conflict = personality.conflict_resolution
 
     print("NPC: Quartermaster Ilya")
-    print(f"Conflict style: {conflict.conflict_resolution_style.value}")
+    print(f"Conflict style: {conflict.style.value}")
     print(
         "Concern priorities: "
         f"self={conflict.concern_for_self.value}, "

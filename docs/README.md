@@ -17,7 +17,7 @@ This directory is the source of truth for repository structure, domain rules, va
 `personalitygen` is organized as a language-neutral repository with equal
 Python and TypeScript implementations under `packages/`. Both are
 dependency-free and expose immutable value objects for Big Five traits,
-conflict-resolution configuration, and ABBF signed-vector profiles. Random
+conflict-resolution behavior, and ABBF signed-vector profiles. Random
 generation accepts an optional caller-owned random source so games, stories,
 and simulations can control reproducibility.
 

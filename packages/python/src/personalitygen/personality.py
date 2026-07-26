@@ -66,18 +66,18 @@ class BigFiveConflictResolutionStyle(str, Enum):
     @classmethod
     def random(
         cls,
-        trait_configuration: BigFiveTraitConfiguration,
+        traits: BigFiveTraits,
         *,
         rng: RandomSource | None = None,
     ) -> Self:
         return _weighted_choice(
-            _conflict_style_weights(trait_configuration),
+            _conflict_style_weights(traits),
             rng=rng,
         )
 
 
 @dataclass(frozen=True, slots=True)
-class BigFiveTraitConfiguration:
+class BigFiveTraits:
     # Appreciation for art, emotion, adventure, and curiosity.
     # Opposite: closedness.
     openness: BigFiveOpenness
@@ -170,14 +170,14 @@ _CONFLICT_MINIMUM_WEIGHT = 0.1
 
 
 def _conflict_style_weights(
-    trait_configuration: BigFiveTraitConfiguration,
+    traits: BigFiveTraits,
 ) -> dict[BigFiveConflictResolutionStyle, float]:
     trait_scores = {
-        "openness": trait_configuration.openness.score,
-        "conscientiousness": trait_configuration.conscientiousness.score,
-        "extraversion": trait_configuration.extraversion.score,
-        "agreeableness": trait_configuration.agreeableness.score,
-        "neuroticism": trait_configuration.neuroticism.score,
+        "openness": traits.openness.score,
+        "conscientiousness": traits.conscientiousness.score,
+        "extraversion": traits.extraversion.score,
+        "agreeableness": traits.agreeableness.score,
+        "neuroticism": traits.neuroticism.score,
     }
     return {
         style: max(
@@ -233,22 +233,21 @@ _validate_style_concerns()
 
 
 @dataclass(frozen=True, slots=True)
-class BigFiveConflictResolutionConfiguration:
-    conflict_resolution_style: BigFiveConflictResolutionStyle
+class BigFiveConflictResolution:
+    style: BigFiveConflictResolutionStyle
     concern_for_self: PriorityLevel = field(init=False)
     concern_for_others: PriorityLevel = field(init=False)
 
     def __post_init__(self) -> None:
         if not isinstance(
-            self.conflict_resolution_style,
+            self.style,
             BigFiveConflictResolutionStyle,
         ):
             raise TypeError(
-                "conflict_resolution_style must be a "
-                "BigFiveConflictResolutionStyle"
+                "style must be a BigFiveConflictResolutionStyle"
             )
         concern_for_self, concern_for_others = _STYLE_TO_CONCERNS[
-            self.conflict_resolution_style
+            self.style
         ]
         object.__setattr__(self, "concern_for_self", concern_for_self)
         object.__setattr__(self, "concern_for_others", concern_for_others)
@@ -256,32 +255,30 @@ class BigFiveConflictResolutionConfiguration:
     @classmethod
     def random(
         cls,
-        trait_configuration: BigFiveTraitConfiguration,
+        traits: BigFiveTraits,
         *,
         rng: RandomSource | None = None,
     ) -> Self:
         style = BigFiveConflictResolutionStyle.random(
-            trait_configuration, rng=rng
+            traits, rng=rng
         )
-        return cls(conflict_resolution_style=style)
+        return cls(style=style)
 
 
 @dataclass(frozen=True, slots=True)
 class BigFivePersonality:
-    trait_configuration: BigFiveTraitConfiguration
-    conflict_resolution_configuration: BigFiveConflictResolutionConfiguration
+    traits: BigFiveTraits
+    conflict_resolution: BigFiveConflictResolution
 
     @classmethod
     def random(
         cls, life_stage: LifeStage, *, rng: RandomSource | None = None
     ) -> Self:
-        trait_configuration = BigFiveTraitConfiguration.random(
-            life_stage, rng=rng
-        )
-        conflict_configuration = BigFiveConflictResolutionConfiguration.random(
-            trait_configuration, rng=rng
+        traits = BigFiveTraits.random(life_stage, rng=rng)
+        conflict_resolution = BigFiveConflictResolution.random(
+            traits, rng=rng
         )
         return cls(
-            trait_configuration=trait_configuration,
-            conflict_resolution_configuration=conflict_configuration,
+            traits=traits,
+            conflict_resolution=conflict_resolution,
         )

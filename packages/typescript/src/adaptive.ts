@@ -7,7 +7,7 @@ import {
   type AdaptiveBifurcatedDomain as Domain,
   type AdaptiveBifurcatedPole as Pole,
 } from "./enums.js";
-import type { BigFiveTraitConfiguration } from "./personality.js";
+import type { BigFiveTraits } from "./personality.js";
 import { type RandomOptions, randomGaussian } from "./randomness.js";
 import {
   cosineSimilarity,
@@ -174,7 +174,7 @@ export class AdaptiveBifurcatedProfile {
     });
   }
 
-  static fromBigFive(traits: BigFiveTraitConfiguration): AdaptiveBifurcatedProfile {
+  static fromBigFive(traits: BigFiveTraits): AdaptiveBifurcatedProfile {
     const openness = unitToSigned(traits.openness.score);
     const conscientiousness = unitToSigned(traits.conscientiousness.score);
     const extraversion = unitToSigned(traits.extraversion.score);

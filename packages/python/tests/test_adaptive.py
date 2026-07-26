@@ -10,7 +10,7 @@ from personalitygen.adaptive import (
     AdaptiveBifurcatedPole,
     AdaptiveBifurcatedProfile,
 )
-from personalitygen.personality import BigFiveTraitConfiguration
+from personalitygen.personality import BigFiveTraits
 from personalitygen.traits import (
     BigFiveAgreeableness,
     BigFiveConscientiousness,
@@ -175,7 +175,7 @@ def test_adaptive_cosine_similarity_returns_zero_for_zero_vector() -> None:
 
 
 def test_adaptive_profile_projects_from_big_five_traits() -> None:
-    traits = BigFiveTraitConfiguration(
+    traits = BigFiveTraits(
         openness=BigFiveOpenness(0.75, 0.75, 0.75),
         conscientiousness=BigFiveConscientiousness(0.25, 0.25, 0.25),
         extraversion=BigFiveExtraversion(0.60, 0.60, 0.60),

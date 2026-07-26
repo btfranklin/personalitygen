@@ -6,10 +6,10 @@ import pytest
 
 from personalitygen.enums import LifeStage, PriorityLevel
 from personalitygen.personality import (
-    BigFiveConflictResolutionConfiguration,
+    BigFiveConflictResolution,
     BigFiveConflictResolutionStyle,
     BigFivePersonality,
-    BigFiveTraitConfiguration,
+    BigFiveTraits,
 )
 from personalitygen.traits import (
     BigFiveAgreeableness,
@@ -65,8 +65,8 @@ class InvalidRandom:
         return float("nan")
 
 
-def flat_trait_configuration(score: float) -> BigFiveTraitConfiguration:
-    return BigFiveTraitConfiguration(
+def flat_traits(score: float) -> BigFiveTraits:
+    return BigFiveTraits(
         openness=BigFiveOpenness(score, score, score),
         conscientiousness=BigFiveConscientiousness(score, score, score),
         extraversion=BigFiveExtraversion(score, score, score),
@@ -75,12 +75,12 @@ def flat_trait_configuration(score: float) -> BigFiveTraitConfiguration:
     )
 
 
-def test_personality_random_configuration() -> None:
+def test_personality_random() -> None:
     rng = random.Random(7)
     personality = BigFivePersonality.random(LifeStage.ADULT, rng=rng)
-    conflict = personality.conflict_resolution_configuration
+    conflict = personality.conflict_resolution
 
-    expected = CONCERN_BY_STYLE[conflict.conflict_resolution_style]
+    expected = CONCERN_BY_STYLE[conflict.style]
     assert (conflict.concern_for_self, conflict.concern_for_others) == expected
 
 
@@ -93,19 +93,17 @@ def test_full_personality_generation_is_deterministic_for_seed() -> None:
     ) == BigFivePersonality.random(LifeStage.ADULT, rng=rng_b)
 
 
-def test_conflict_configuration_derives_concerns_for_every_style() -> None:
-    trait_configuration = flat_trait_configuration(0.0)
+def test_conflict_resolution_derives_concerns_for_every_style() -> None:
+    traits = flat_traits(0.0)
     rng = SequenceRandom([0.05, 0.15, 0.25, 0.35, 0.45])
 
     results = [
-        BigFiveConflictResolutionConfiguration.random(
-            trait_configuration, rng=rng
-        )
+        BigFiveConflictResolution.random(traits, rng=rng)
         for _ in CONCERN_BY_STYLE
     ]
 
     assert [
-        result.conflict_resolution_style for result in results
+        result.style for result in results
     ] == list(CONCERN_BY_STYLE)
     assert [
         (result.concern_for_self, result.concern_for_others)
@@ -113,27 +111,27 @@ def test_conflict_configuration_derives_concerns_for_every_style() -> None:
     ] == list(CONCERN_BY_STYLE.values())
 
 
-def test_conflict_configuration_derives_concerns_when_authored() -> None:
-    configurations = [
-        BigFiveConflictResolutionConfiguration(style)
+def test_conflict_resolution_derives_concerns_when_authored() -> None:
+    resolutions = [
+        BigFiveConflictResolution(style=style)
         for style in BigFiveConflictResolutionStyle
     ]
 
     assert [
-        (configuration.concern_for_self, configuration.concern_for_others)
-        for configuration in configurations
+        (resolution.concern_for_self, resolution.concern_for_others)
+        for resolution in resolutions
     ] == list(CONCERN_BY_STYLE.values())
 
 
 def test_conflict_style_floors_negative_weights() -> None:
     # All maxed scores make DOMINATING negative and COMPROMISING zero.
-    trait_configuration = flat_trait_configuration(1.0)
+    traits = flat_traits(1.0)
     rng = SequenceRandom([1.25, 1.35])
 
     # Negative/zero levels are floored to allow rare counter-indicated picks.
     results = [
         BigFiveConflictResolutionStyle.random(
-            trait_configuration, rng=rng
+            traits, rng=rng
         )
         for _ in range(2)
     ]
@@ -144,10 +142,10 @@ def test_conflict_style_floors_negative_weights() -> None:
 
 
 def test_conflict_style_assigns_upper_endpoint_to_final_bucket() -> None:
-    trait_configuration = flat_trait_configuration(1.0)
+    traits = flat_traits(1.0)
 
     assert BigFiveConflictResolutionStyle.random(
-        trait_configuration,
+        traits,
         rng=UpperEndpointRandom(),
     ) is BigFiveConflictResolutionStyle.COMPROMISING
 
@@ -158,6 +156,6 @@ def test_conflict_style_rejects_invalid_uniform_draw() -> None:
         match="RandomSource.uniform returned a value out of range",
     ):
         BigFiveConflictResolutionStyle.random(
-            flat_trait_configuration(0.5),
+            flat_traits(0.5),
             rng=InvalidRandom(),
         )

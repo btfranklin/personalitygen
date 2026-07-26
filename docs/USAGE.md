@@ -15,7 +15,8 @@ Python and TypeScript expose the same concepts with language-idiomatic names:
 | --- | --- | --- |
 | complete random profile | `BigFivePersonality.random()` | `BigFivePersonality.random()` |
 | Big Five to ABBF | `from_big_five()` | `fromBigFive()` |
-| trait configuration | `trait_configuration` | `traitConfiguration` |
+| full trait collection | `traits` | `traits` |
+| conflict resolution | `conflict_resolution` | `conflictResolution` |
 | dominant poles | `dominant_poles()` | `dominantPoles()` |
 | vector similarity | `cosine_similarity()` | `cosineSimilarity()` |
 
@@ -35,8 +36,8 @@ from personalitygen import BigFivePersonality, LifeStage
 rng = random.Random(42)
 personality = BigFivePersonality.random(LifeStage.ADULT, rng=rng)
 
-print(personality.trait_configuration)
-print(personality.conflict_resolution_configuration.conflict_resolution_style)
+print(personality.traits)
+print(personality.conflict_resolution.style)
 ```
 
 Pass a seeded random source when a world, save file, test fixture, or content
@@ -53,10 +54,8 @@ const rng = {
   },
 };
 const personality = BigFivePersonality.random(LifeStage.Adult, { rng });
-console.log(personality.traitConfiguration);
-console.log(
-  personality.conflictResolutionConfiguration.conflictResolutionStyle,
-);
+console.log(personality.traits);
+console.log(personality.conflictResolution.style);
 ```
 
 ## Use ABBF As A Character Vector
@@ -110,12 +109,12 @@ import random
 
 from personalitygen import (
     AdaptiveBifurcatedProfile,
-    BigFiveTraitConfiguration,
+    BigFiveTraits,
     LifeStage,
 )
 
 rng = random.Random(23)
-traits = BigFiveTraitConfiguration.random(LifeStage.YOUNG_ADULT, rng=rng)
+traits = BigFiveTraits.random(LifeStage.YOUNG_ADULT, rng=rng)
 profile = AdaptiveBifurcatedProfile.from_big_five(traits)
 
 for axis in profile.axes:
@@ -128,7 +127,7 @@ Projection is a stable generator heuristic documented in
 ```typescript
 import {
   AdaptiveBifurcatedProfile,
-  BigFiveTraitConfiguration,
+  BigFiveTraits,
   LifeStage,
 } from "personalitygen";
 
@@ -137,7 +136,7 @@ const rng = {
     return minimum + (maximum - minimum) * 0.5;
   },
 };
-const traits = BigFiveTraitConfiguration.random(LifeStage.YoungAdult, { rng });
+const traits = BigFiveTraits.random(LifeStage.YoungAdult, { rng });
 const profile = AdaptiveBifurcatedProfile.fromBigFive(traits);
 
 for (const axis of profile.axes) {

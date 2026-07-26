@@ -80,7 +80,7 @@ try {
     `
       import { AdaptiveBifurcatedProfile, BigFivePersonality, LifeStage } from "personalitygen";
       const personality = BigFivePersonality.random(LifeStage.Adult);
-      const profile = AdaptiveBifurcatedProfile.fromBigFive(personality.traitConfiguration);
+      const profile = AdaptiveBifurcatedProfile.fromBigFive(personality.traits);
       if (profile.vector.length !== 5) process.exit(1);
     `,
   );
@@ -93,7 +93,7 @@ try {
     `
       import { AdaptiveBifurcatedProfile, BigFivePersonality, LifeStage } from "personalitygen";
       const personality = BigFivePersonality.random(LifeStage.Adult);
-      AdaptiveBifurcatedProfile.fromBigFive(personality.traitConfiguration);
+      AdaptiveBifurcatedProfile.fromBigFive(personality.traits);
     `,
   );
   writeFileSync(

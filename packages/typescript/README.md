@@ -25,10 +25,10 @@ import {
 
 const personality = BigFivePersonality.random(LifeStage.Adult);
 const adaptive = AdaptiveBifurcatedProfile.fromBigFive(
-  personality.traitConfiguration,
+  personality.traits,
 );
 
-console.log(personality.conflictResolutionConfiguration);
+console.log(personality.conflictResolution.style);
 console.log(adaptive.vector);
 console.log(adaptive.dominantPoles(0.25));
 ```
@@ -48,8 +48,11 @@ const personality = BigFivePersonality.random(LifeStage.Adult, { rng });
 
 ## Models
 
-- `BigFivePersonality` combines a five-trait configuration with a weighted
-  conflict-resolution style.
+- `BigFiveTraits` groups the five OCEAN trait value objects.
+- `BigFiveConflictResolution` records a style and its derived concern
+  priorities.
+- `BigFivePersonality` combines `BigFiveTraits` with
+  `BigFiveConflictResolution`.
 - `AdaptiveBifurcatedProfile` represents the signed ABBF vector in canonical
   order: order, chaos, cooperation, conflict, competition.
 - All exported model instances and enum-like value objects are frozen.

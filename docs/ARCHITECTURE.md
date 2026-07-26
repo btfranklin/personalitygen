@@ -31,7 +31,8 @@ targeting ES2022 and uses frozen classes plus frozen const objects.
 - `packages/python/src/personalitygen/randomness.py`: the minimal random-source protocol and truncated Gaussian helper.
 - `packages/python/src/personalitygen/_scoring.py`: internal score validation, signed projection, and vector math helpers.
 - `packages/python/src/personalitygen/traits.py`: Big Five trait value objects, life-stage sampling configuration, unit-range validation, and aggregate score calculation.
-- `packages/python/src/personalitygen/personality.py`: full trait configurations, conflict-resolution style derivation, and full personality generation.
+- `packages/python/src/personalitygen/personality.py`: full trait collections,
+  conflict-resolution derivation, and complete personality generation.
 - `packages/python/src/personalitygen/adaptive.py`: Adaptive Bifurcated Big Five signed-vector profiles, axis metadata, and Big Five projection.
 - `packages/python/src/personalitygen/__init__.py`: the stable public import surface.
 
@@ -45,7 +46,7 @@ targeting ES2022 and uses frozen classes plus frozen const objects.
   and vector math.
 - `packages/typescript/src/traits.ts`: Big Five value objects and life-stage
   sampling.
-- `packages/typescript/src/personality.ts`: trait configurations, weighted
+- `packages/typescript/src/personality.ts`: full trait collections, weighted
   conflict resolution, and complete personality generation.
 - `packages/typescript/src/adaptive.ts`: ABBF profiles, axes, projection, and
   vector operations.

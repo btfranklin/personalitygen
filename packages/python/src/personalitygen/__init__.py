@@ -8,10 +8,10 @@ from personalitygen.adaptive import (
 )
 from personalitygen.enums import LifeStage, PriorityLevel
 from personalitygen.personality import (
-    BigFiveConflictResolutionConfiguration,
+    BigFiveConflictResolution,
     BigFiveConflictResolutionStyle,
     BigFivePersonality,
-    BigFiveTraitConfiguration,
+    BigFiveTraits,
 )
 from personalitygen.traits import (
     BigFiveAgreeableness,
@@ -28,13 +28,13 @@ __all__ = [
     "AdaptiveBifurcatedProfile",
     "BigFiveAgreeableness",
     "BigFiveConscientiousness",
-    "BigFiveConflictResolutionConfiguration",
+    "BigFiveConflictResolution",
     "BigFiveConflictResolutionStyle",
     "BigFiveExtraversion",
     "BigFiveNeuroticism",
     "BigFiveOpenness",
     "BigFivePersonality",
-    "BigFiveTraitConfiguration",
+    "BigFiveTraits",
     "LifeStage",
     "PriorityLevel",
 ]

@@ -9,10 +9,10 @@ from personalitygen.adaptive import (
 )
 from personalitygen.enums import LifeStage, PriorityLevel
 from personalitygen.personality import (
-    BigFiveConflictResolutionConfiguration,
+    BigFiveConflictResolution,
     BigFiveConflictResolutionStyle,
     BigFivePersonality,
-    BigFiveTraitConfiguration,
+    BigFiveTraits,
 )
 from personalitygen.traits import (
     BigFiveAgreeableness,
@@ -30,15 +30,13 @@ EXPECTED_PUBLIC_API = {
     "AdaptiveBifurcatedProfile": AdaptiveBifurcatedProfile,
     "BigFiveAgreeableness": BigFiveAgreeableness,
     "BigFiveConscientiousness": BigFiveConscientiousness,
-    "BigFiveConflictResolutionConfiguration": (
-        BigFiveConflictResolutionConfiguration
-    ),
+    "BigFiveConflictResolution": BigFiveConflictResolution,
     "BigFiveConflictResolutionStyle": BigFiveConflictResolutionStyle,
     "BigFiveExtraversion": BigFiveExtraversion,
     "BigFiveNeuroticism": BigFiveNeuroticism,
     "BigFiveOpenness": BigFiveOpenness,
     "BigFivePersonality": BigFivePersonality,
-    "BigFiveTraitConfiguration": BigFiveTraitConfiguration,
+    "BigFiveTraits": BigFiveTraits,
     "LifeStage": LifeStage,
     "PriorityLevel": PriorityLevel,
 }

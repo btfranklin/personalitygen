@@ -1,8 +1,6 @@
 import {
   AdaptiveBifurcatedDomain,
-  type AdaptiveBifurcatedDomainValue,
   AdaptiveBifurcatedPole,
-  type AdaptiveBifurcatedPoleValue,
   AdaptiveBifurcatedProfile,
 } from "../dist/index.js";
 
@@ -25,8 +23,8 @@ const cast = {
 };
 
 function selectByPole(
-  domain: AdaptiveBifurcatedDomainValue,
-  pole: AdaptiveBifurcatedPoleValue,
+  domain: AdaptiveBifurcatedDomain,
+  pole: AdaptiveBifurcatedPole,
   threshold = 0.4,
 ): string[] {
   return Object.entries(cast)

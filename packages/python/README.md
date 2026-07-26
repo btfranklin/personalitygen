@@ -32,18 +32,18 @@ conventional Big Five (OCEAN) profiles and Adaptive Bifurcated Big Five (ABBF) s
 from personalitygen import BigFivePersonality, LifeStage
 
 personality = BigFivePersonality.random(LifeStage.ADULT)
-print(personality.trait_configuration)
-print(personality.conflict_resolution_configuration)
+print(personality.traits)
+print(personality.conflict_resolution)
 ```
 
 If you want deterministic output, pass a seeded random number generator:
 
 ```python
 import random
-from personalitygen import BigFiveTraitConfiguration, LifeStage
+from personalitygen import BigFiveTraits, LifeStage
 
 rng = random.Random(42)
-traits = BigFiveTraitConfiguration.random(LifeStage.YOUNG_ADULT, rng=rng)
+traits = BigFiveTraits.random(LifeStage.YOUNG_ADULT, rng=rng)
 print(traits)
 ```
 

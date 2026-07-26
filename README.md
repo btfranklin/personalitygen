@@ -29,7 +29,7 @@ from personalitygen import AdaptiveBifurcatedProfile, BigFivePersonality, LifeSt
 
 personality = BigFivePersonality.random(LifeStage.ADULT)
 profile = AdaptiveBifurcatedProfile.from_big_five(
-    personality.trait_configuration
+    personality.traits
 )
 ```
 
@@ -44,7 +44,7 @@ import {
 
 const personality = BigFivePersonality.random(LifeStage.Adult);
 const profile = AdaptiveBifurcatedProfile.fromBigFive(
-  personality.traitConfiguration,
+  personality.traits,
 );
 ```
 

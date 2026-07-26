@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from personalitygen import AdaptiveBifurcatedProfile, BigFiveTraitConfiguration
+from personalitygen import AdaptiveBifurcatedProfile, BigFiveTraits
 from personalitygen.traits import (
     BigFiveAgreeableness,
     BigFiveConscientiousness,
@@ -13,7 +13,7 @@ from personalitygen.traits import (
 
 
 def main() -> None:
-    traits = BigFiveTraitConfiguration(
+    traits = BigFiveTraits(
         openness=BigFiveOpenness(0.75, 0.70, 0.80),
         conscientiousness=BigFiveConscientiousness(0.65, 0.70, 0.75),
         extraversion=BigFiveExtraversion(0.40, 0.45, 0.50),
