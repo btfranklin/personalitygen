@@ -1,6 +1,6 @@
 # personalitygen
 
-![personalitygen social preview](https://raw.githubusercontent.com/btfranklin/personalitygen/main/.github/social%20preview/personalitygen_social_preview.jpg "personalitygen")
+![personalitygen banner](https://raw.githubusercontent.com/btfranklin/personalitygen/main/.github/social%20preview/personalitygen_social_preview.jpg "personalitygen")
 
 `personalitygen` generates simulated character personalities for games,
 storytelling, simulations, and tests. The project models conventional Big Five
