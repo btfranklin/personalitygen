@@ -16,8 +16,9 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": false,
     "sourceMap": true,
+    "inlineSources": true,
     "skipLibCheck": false
   },
   "include": ["src/**/*.ts"]

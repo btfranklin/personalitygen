@@ -20,6 +20,7 @@
 - Install: `pdm install -p packages/python --group dev`
 - Tests: `pdm run -p packages/python test`
 - Lint: `pdm run -p packages/python lint`
+- Type check: `pdm run -p packages/python typecheck`
 - TypeScript install: `npm ci --prefix packages/typescript`
 - TypeScript checks: `npm run --prefix packages/typescript check`
 

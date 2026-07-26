@@ -28,6 +28,7 @@ from personalitygen._scoring import (
 )
 from personalitygen.adaptive import (
     _ABBF_RANDOM_STDDEV,
+    _ABBF_PROJECTION_COEFFICIENTS,
     _AXIS_DEFINITIONS,
 )
 from personalitygen.constants import UNIT_RANGE_MAX, UNIT_RANGE_MIN
@@ -201,6 +202,7 @@ def test_model_matches_python_configuration() -> None:
         }
         for _, domain, positive, negative in _AXIS_DEFINITIONS
     ] == MODEL["adaptive"]["axes"]
+    assert _ABBF_PROJECTION_COEFFICIENTS == MODEL["adaptive"]["projection"]
 
 
 def test_validation_conformance() -> None:

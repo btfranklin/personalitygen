@@ -34,6 +34,36 @@ jobs:
             - name: Lint with ruff
               working-directory: packages/python
               run: pdm run lint
+            - name: Type-check with mypy
+              working-directory: packages/python
+              run: pdm run typecheck
             - name: Test with pytest
               working-directory: packages/python
               run: pdm run test
+
+    package:
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v6
+              with:
+                  python-version: "3.11"
+            - name: Install PDM
+              uses: pdm-project/setup-pdm@v4
+              with:
+                  cache: true
+                  cache-dependency-path: packages/python/pdm.lock
+            - name: Install dependencies
+              working-directory: packages/python
+              run: pdm install --group dev
+            - name: Build package
+              working-directory: packages/python
+              run: pdm build --dest package-dist
+            - name: Verify package
+              working-directory: packages/python
+              run: pdm run verify-package --dist package-dist

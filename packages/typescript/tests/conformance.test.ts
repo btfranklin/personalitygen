@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { test } from "node:test";
 import { ABBF_PROJECTION_COEFFICIENTS, AXIS_DEFINITIONS } from "../dist/adaptive.js";
 import {
@@ -59,6 +59,7 @@ interface Model {
     Record<
       string,
       {
+        readonly components: readonly string[];
         readonly standardDeviation: number;
         readonly means: Readonly<Record<string, readonly number[]>>;
       }
@@ -95,6 +96,41 @@ function loadJson<T>(path: string): T {
 const model = loadJson<Model>("model.json");
 const arithmeticTolerance = model.tolerances.arithmetic;
 const gaussianTolerance = model.tolerances.gaussian;
+const CONFORMANCE_FIXTURES = Object.freeze({
+  adaptive: "adaptive.json",
+  aggregateScoring: "aggregate-scoring.json",
+  conflictResolution: "conflict-resolution.json",
+  gaussianSampling: "gaussian-sampling.json",
+  lifeStageSampling: "life-stage-sampling.json",
+  validation: "validation.json",
+});
+const TRAIT_COMPONENT_PROPERTIES = Object.freeze({
+  openness: Object.freeze({
+    aesthetic_sensitivity: "aestheticSensitivityScore",
+    creative_imagination: "creativeImaginationScore",
+    intellectual_curiosity: "intellectualCuriosityScore",
+  }),
+  conscientiousness: Object.freeze({
+    organization: "organizationScore",
+    responsibility: "responsibilityScore",
+    productivity: "productivityScore",
+  }),
+  extraversion: Object.freeze({
+    assertiveness: "assertivenessScore",
+    sociability: "sociabilityScore",
+    energy_level: "energyLevelScore",
+  }),
+  agreeableness: Object.freeze({
+    compassion: "compassionScore",
+    respectfulness: "respectfulnessScore",
+    trust: "trustScore",
+  }),
+  neuroticism: Object.freeze({
+    anxiety: "anxietyScore",
+    emotional_volatility: "emotionalVolatilityScore",
+    depression: "depressionScore",
+  }),
+});
 
 function assertClose(actual: number, expected: number, tolerance: number): void {
   assert.ok(
@@ -188,6 +224,12 @@ test("implementation constants match the language-neutral model", () => {
       TRAIT_SAMPLING_CONFIGURATIONS[name as keyof typeof TRAIT_SAMPLING_CONFIGURATIONS];
     assert.equal(actual.standardDeviation, expected.standardDeviation);
     assert.deepEqual(actual.means, expected.means);
+    assert.deepEqual(
+      Object.keys(
+        TRAIT_COMPONENT_PROPERTIES[name as keyof typeof TRAIT_COMPONENT_PROPERTIES],
+      ),
+      expected.components,
+    );
   }
   assert.equal(CONFLICT_MINIMUM_WEIGHT, model.conflictResolution.minimumWeight);
   for (const [style, expected] of Object.entries(model.conflictResolution.styles)) {
@@ -211,13 +253,20 @@ test("implementation constants match the language-neutral model", () => {
   assert.deepEqual(ABBF_PROJECTION_COEFFICIENTS, model.adaptive.projection);
 });
 
+test("conformance fixture set is explicit", () => {
+  const actual = readdirSync(new URL("conformance/", specRoot))
+    .filter((path) => path.endsWith(".json"))
+    .sort();
+  assert.deepEqual(actual, Object.values(CONFORMANCE_FIXTURES).sort());
+});
+
 test("aggregate scoring fixtures", () => {
   const fixtures = loadJson<{
     readonly cases: readonly {
       readonly components: readonly number[];
       readonly expected: number;
     }[];
-  }>("conformance/aggregate-scoring.json");
+  }>(`conformance/${CONFORMANCE_FIXTURES.aggregateScoring}`);
   for (const fixture of fixtures.cases) {
     assertClose(
       componentAverageScore(...fixture.components),
@@ -249,7 +298,7 @@ test("validation fixtures", () => {
         readonly maximum: number;
       }[];
     };
-  }>("conformance/validation.json");
+  }>(`conformance/${CONFORMANCE_FIXTURES.validation}`);
   for (const score of fixtures.unitScores.valid) {
     assert.doesNotThrow(
       () =>
@@ -306,7 +355,7 @@ test("truncated Gaussian fixtures", () => {
       readonly uniformFraction: number;
       readonly expected: number;
     }[];
-  }>("conformance/gaussian-sampling.json");
+  }>(`conformance/${CONFORMANCE_FIXTURES.gaussianSampling}`);
   for (const fixture of fixtures.cases) {
     assertClose(
       randomGaussian({
@@ -329,38 +378,32 @@ test("life-stage generation fixtures", () => {
       readonly uniformFractions: readonly number[];
       readonly expected: Readonly<Record<string, readonly number[]>>;
     }[];
-  }>("conformance/life-stage-sampling.json");
+  }>(`conformance/${CONFORMANCE_FIXTURES.lifeStageSampling}`);
   for (const fixture of fixtures.cases) {
     const traits = BigFiveTraitConfiguration.random(fixture.lifeStage, {
       rng: fractionSource(fixture.uniformFractions),
     });
-    const actual = {
-      openness: [
-        traits.openness.aestheticSensitivityScore,
-        traits.openness.creativeImaginationScore,
-        traits.openness.intellectualCuriosityScore,
-      ],
-      conscientiousness: [
-        traits.conscientiousness.organizationScore,
-        traits.conscientiousness.responsibilityScore,
-        traits.conscientiousness.productivityScore,
-      ],
-      extraversion: [
-        traits.extraversion.assertivenessScore,
-        traits.extraversion.sociabilityScore,
-        traits.extraversion.energyLevelScore,
-      ],
-      agreeableness: [
-        traits.agreeableness.compassionScore,
-        traits.agreeableness.respectfulnessScore,
-        traits.agreeableness.trustScore,
-      ],
-      neuroticism: [
-        traits.neuroticism.anxietyScore,
-        traits.neuroticism.emotionalVolatilityScore,
-        traits.neuroticism.depressionScore,
-      ],
-    };
+    const actual = Object.fromEntries(
+      Object.entries(TRAIT_COMPONENT_PROPERTIES).map(
+        ([traitName, componentProperties]) => {
+          const trait = traits[
+            traitName as keyof typeof TRAIT_COMPONENT_PROPERTIES
+          ] as unknown as Readonly<Record<string, number>>;
+          return [
+            traitName,
+            Object.values(componentProperties).map((propertyName) => {
+              const value = trait[propertyName];
+              assert.equal(
+                typeof value,
+                "number",
+                `${traitName}.${propertyName} is not a numeric public property`,
+              );
+              return value as number;
+            }),
+          ];
+        },
+      ),
+    );
     for (const [name, values] of Object.entries(actual)) {
       const expected = fixture.expected[name] as readonly number[];
       values.forEach((value, index) => {
@@ -386,7 +429,7 @@ test("weighted conflict selection fixtures", () => {
         readonly expected: string;
       }[];
     }[];
-  }>("conformance/conflict-resolution.json");
+  }>(`conformance/${CONFORMANCE_FIXTURES.conflictResolution}`);
   for (const fixture of fixtures.cases) {
     const traits = traitConfiguration(fixture.traits);
     const weights = conflictStyleWeights(traits);
@@ -431,7 +474,7 @@ test("ABBF projection, poles, dot products, and cosine fixtures", () => {
       readonly dotProduct: number;
       readonly cosineSimilarity: number;
     }[];
-  }>("conformance/adaptive.json");
+  }>(`conformance/${CONFORMANCE_FIXTURES.adaptive}`);
   for (const fixture of fixtures.projectionCases) {
     const actual = AdaptiveBifurcatedProfile.fromBigFive(
       traitConfiguration(fixture.bigFive),

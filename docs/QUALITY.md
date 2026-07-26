@@ -46,12 +46,29 @@ Run both language checks before committing behavior changes:
 ```bash
 pdm run -p packages/python test
 pdm run -p packages/python lint
+pdm run -p packages/python typecheck
 npm run --prefix packages/typescript check
 ```
 
 The TypeScript check runs Biome, TypeScript 7 compilation, Node's built-in test
 runner, all conformance fixtures, TypeScript 6 declaration consumption, package
-content inspection, and an isolated tarball installation.
+content inspection, an isolated tarball installation, and a browser-targeted
+esbuild bundle that is executed as a semantic smoke test. JavaScript source
+maps embed their TypeScript sources; declaration maps are intentionally omitted
+because the package does not ship its source tree.
+
+Verify a freshly built Python distribution with:
+
+```bash
+pdm build -p packages/python --dest packages/python/package-dist
+pdm run -p packages/python verify-package --dist package-dist
+```
+
+The verifier inspects both archives, including `py.typed`, rejects tests and
+shared specification data, installs the exact wheel in an isolated virtual
+environment, and executes a public API smoke test. Strict mypy validation also
+includes a consumer proving that an RNG implementing only `uniform()` satisfies
+the shipped typed API.
 
 ## Test Contracts
 
@@ -84,9 +101,10 @@ Before release, verify:
 
 1. Python CI passes on 3.11–3.14.
 2. TypeScript CI passes on Node 24 and 26.
-3. `pdm build -p packages/python` succeeds and includes `py.typed`.
+3. The Python package verifier passes against a fresh wheel and source
+   distribution, including isolated installation and `py.typed` inspection.
 4. `npm run --prefix packages/typescript check` succeeds and the tarball
    contains only package metadata, license, README, ESM, declarations, and
-   source maps.
+   embedded-source JavaScript maps, then bundles for a browser target.
 5. Both package versions match the release tag.
 6. Both OIDC publishing workflows build and test from the release commit.

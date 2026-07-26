@@ -101,6 +101,29 @@ _AXIS_DEFINITIONS = (
 )
 
 _ABBF_RANDOM_STDDEV = 0.35
+_ABBF_PROJECTION_COEFFICIENTS = {
+    "order": {"openness": 1.0},
+    "chaos": {
+        "agreeableness": 0.45,
+        "conscientiousness": 0.35,
+        "neuroticism": -0.20,
+    },
+    "cooperation": {
+        "extraversion": 0.55,
+        "agreeableness": 0.45,
+    },
+    "conflict": {
+        "agreeableness": 0.40,
+        "neuroticism": 0.30,
+        "openness": 0.20,
+        "conscientiousness": -0.10,
+    },
+    "competition": {
+        "conscientiousness": 0.50,
+        "agreeableness": 0.30,
+        "extraversion": -0.20,
+    },
+}
 
 
 def _sample_signed_score(*, rng: RandomSource | None = None) -> float:
@@ -142,34 +165,30 @@ class AdaptiveBifurcatedProfile:
     def from_big_five(cls, traits: BigFiveTraitConfiguration) -> Self:
         """Project a Big Five trait configuration into an ABBF profile."""
 
-        openness = unit_to_signed(traits.openness.score)
-        conscientiousness = unit_to_signed(traits.conscientiousness.score)
-        extraversion = unit_to_signed(traits.extraversion.score)
-        agreeableness = unit_to_signed(traits.agreeableness.score)
-        neuroticism = unit_to_signed(traits.neuroticism.score)
+        trait_scores = {
+            "openness": unit_to_signed(traits.openness.score),
+            "conscientiousness": unit_to_signed(traits.conscientiousness.score),
+            "extraversion": unit_to_signed(traits.extraversion.score),
+            "agreeableness": unit_to_signed(traits.agreeableness.score),
+            "neuroticism": unit_to_signed(traits.neuroticism.score),
+        }
+
+        def project(domain: str) -> float:
+            return weighted_signed_average(
+                *(
+                    (trait_scores[trait_name], coefficient)
+                    for trait_name, coefficient in _ABBF_PROJECTION_COEFFICIENTS[
+                        domain
+                    ].items()
+                )
+            )
 
         return cls(
-            order_score=openness,
-            chaos_score=weighted_signed_average(
-                (agreeableness, 0.45),
-                (conscientiousness, 0.35),
-                (neuroticism, -0.20),
-            ),
-            cooperation_score=weighted_signed_average(
-                (extraversion, 0.55),
-                (agreeableness, 0.45),
-            ),
-            conflict_score=weighted_signed_average(
-                (agreeableness, 0.40),
-                (neuroticism, 0.30),
-                (openness, 0.20),
-                (conscientiousness, -0.10),
-            ),
-            competition_score=weighted_signed_average(
-                (conscientiousness, 0.50),
-                (agreeableness, 0.30),
-                (extraversion, -0.20),
-            ),
+            order_score=project("order"),
+            chaos_score=project("chaos"),
+            cooperation_score=project("cooperation"),
+            conflict_score=project("conflict"),
+            competition_score=project("competition"),
         )
 
     @property
