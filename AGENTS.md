@@ -31,5 +31,7 @@
 - Keep runtime dependencies empty unless the package genuinely needs one; dev dependencies should use lower bounds such as `>=`.
 - Build the TypeScript package with TypeScript 7 while keeping its public
   declarations consumable by TypeScript 6+.
+- Test TypeScript on exactly two Node.js lines: the current LTS and the latest
+  release. Replace old matrix entries rather than accumulating them.
 - Keep both packages on the same public version.
 - Tests should encode the behavioral contract: unit-range validation, aggregate scoring, life-stage sampling, deterministic randomness, and conflict-style derivation.

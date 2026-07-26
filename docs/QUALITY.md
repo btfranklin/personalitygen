@@ -18,6 +18,10 @@ must compile under TypeScript 6+. TypeScript is a development dependency, not a
 consumer runtime dependency. Manage TypeScript tooling with npm, commit
 `package-lock.json`, and use lower-bound development constraints.
 
+Node CI covers exactly the current LTS and latest release lines. As of this
+decision those are Node 24 and 26; replace the two entries as Node's release
+channels advance rather than retaining older supported lines.
+
 Python and TypeScript public versions move in lockstep.
 
 ## Cross-Language Contract
@@ -79,7 +83,7 @@ Prefer deterministic fake random sources or seeded `random.Random` instances. Ke
 Before release, verify:
 
 1. Python CI passes on 3.11–3.14.
-2. TypeScript CI passes on Node 22, 24, and 26.
+2. TypeScript CI passes on Node 24 and 26.
 3. `pdm build -p packages/python` succeeds and includes `py.typed`.
 4. `npm run --prefix packages/typescript check` succeeds and the tarball
    contains only package metadata, license, README, ESM, declarations, and

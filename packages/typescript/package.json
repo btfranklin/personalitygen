@@ -19,7 +19,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.examples.json --noEmit",
+    "typecheck": "npm run build && tsc -p tsconfig.examples.json --noEmit",
     "typecheck:compat": "tsc6 -p tests/compat/tsconfig.json",
     "lint": "biome check src tests examples scripts",
     "test": "npm run build && tsc -p tsconfig.test.json && node --test .test-dist/*.test.js",

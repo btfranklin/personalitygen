@@ -5,7 +5,8 @@ simulations using the Big Five (OCEAN) and Adaptive Bifurcated Big Five
 (ABBF) models.
 
 The package is dependency-free, ESM-only, browser/bundler friendly, and ships
-JavaScript plus TypeScript declarations.
+JavaScript plus TypeScript declarations. CI tests the current Node.js LTS and
+latest release lines.
 
 ## Install
 

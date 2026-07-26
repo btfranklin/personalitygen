@@ -19,6 +19,7 @@ The TypeScript package:
 - accepts a structural `RandomSource` rather than owning a seeded generator
 - builds with TypeScript 7 and verifies declaration consumption with
   TypeScript 6
+- tests exactly the current Node.js LTS and latest release lines
 - uses Node's built-in test runner and Biome
 
 ## Consequences

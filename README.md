@@ -14,7 +14,7 @@ version and shared behavior:
 - [Python](packages/python/README.md): Python 3.11–3.14, published on
   [PyPI](https://pypi.org/project/personalitygen/).
 - [TypeScript](packages/typescript/README.md): ESM and ES2022 for browsers,
-  bundlers, and modern JavaScript runtimes, published on
+  bundlers, and the current Node.js LTS and latest release lines, published on
   [npm](https://www.npmjs.com/package/personalitygen).
 
 ```shell
