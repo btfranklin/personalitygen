@@ -47,6 +47,12 @@ traits = BigFiveTraits.random(LifeStage.YOUNG_ADULT, rng=rng)
 print(traits)
 ```
 
+Custom random sources need only provide `uniform(minimum, maximum)`. They may
+return either inclusive endpoint and must return a finite value inside the
+requested range. A fixed draw sequence is reproducible within one package
+version; the same integer seed is not guaranteed to produce identical profiles
+after a later model or algorithm change.
+
 ABBF profiles can be generated directly or projected from Big Five traits:
 
 ```python
@@ -66,8 +72,7 @@ This package targets Python 3.11+.
 
 ```bash
 pdm install --group dev
-pdm run test
-pdm run lint
+pdm run check
 ```
 
 Deeper architecture, quality, and maintenance guidance lives in the

@@ -18,6 +18,10 @@
   `spec/`, and both suites prove that they consume the complete fixture set.
 - The TypeScript peer is built with TypeScript 7, verifies TypeScript 6
   declaration consumption, and inspects an isolated npm tarball.
+- Python provides one complete local check covering lint, strict typing, tests,
+  build artifacts, isolated installation, and its public smoke test.
+- One shared publishing workflow gates both registries on successful Python
+  and TypeScript preflights from the same release tag.
 - Architecture and quality guidance now live under `docs/`.
 - Score validation and vector math now live in a small internal helper shared by Big Five and ABBF models.
 - Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, ABBF vectors, runnable examples, public exports, and documentation/runtime alignment.
@@ -27,8 +31,6 @@
 - Runtime model tables remain explicit inside each implementation, while
   `spec/model.json` gives tests and other language implementations one
   canonical table-shaped reference.
-- The shared publishing workflow must validate both language packages from the
-  same release tag before either registry publisher becomes eligible.
 
 ## Entropy Controls
 

@@ -46,6 +46,12 @@ const rng = {
 const personality = BigFivePersonality.random(LifeStage.Adult, { rng });
 ```
 
+`uniform(minimum, maximum)` may return either inclusive endpoint and must
+return a finite value inside the requested range; malformed results raise
+`RangeError`. A caller-owned seeded source makes a fixed sequence reproducible
+within one package version. Outputs from the same integer seed are not
+guaranteed to remain identical after a later model or algorithm change.
+
 ## Models
 
 - `BigFiveTraits` groups the five OCEAN trait value objects.

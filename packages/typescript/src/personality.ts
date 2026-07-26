@@ -6,7 +6,11 @@ import {
   type PriorityLevel as Priority,
   PriorityLevel,
 } from "./enums.js";
-import type { RandomOptions, RandomSource } from "./randomness.js";
+import {
+  DEFAULT_RANDOM_SOURCE,
+  type RandomOptions,
+  type RandomSource,
+} from "./randomness.js";
 import {
   BigFiveAgreeableness,
   BigFiveConscientiousness,
@@ -147,12 +151,6 @@ function weightedChoice(
     CONFLICT_RESOLUTION_STYLES.length - 1
   ] as ConflictStyle;
 }
-
-const DEFAULT_RANDOM_SOURCE: RandomSource = Object.freeze({
-  uniform(minimum: number, maximum: number): number {
-    return minimum + (maximum - minimum) * Math.random();
-  },
-});
 
 export interface BigFiveTraitsOptions {
   readonly openness: BigFiveOpenness;

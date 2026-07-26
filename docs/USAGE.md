@@ -41,7 +41,9 @@ print(personality.conflict_resolution.style)
 ```
 
 Pass a seeded random source when a world, save file, test fixture, or content
-pipeline needs reproducible output.
+pipeline needs reproducible output within a fixed package version. The same
+integer seed is not guaranteed to remain stable after a later model or
+algorithm change.
 
 The TypeScript equivalent accepts any object with `uniform(minimum, maximum)`:
 

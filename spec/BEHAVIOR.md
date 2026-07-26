@@ -30,7 +30,8 @@ documentation agree.
 
 Random sampling uses an injectable source capable of drawing a finite value
 uniformly between two inclusive bounds. Implementations reject values outside
-the requested bounds and may adapt their ecosystem's native random source.
+the requested bounds and may adapt their ecosystem's native random source. A
+caller-owned source may return either endpoint.
 
 Life-stage components use inverse-CDF sampling from a normal distribution
 truncated to `0.01..1.0`. ABBF random profiles use the same approach with mean
@@ -40,7 +41,10 @@ are constrained to `1e-12..(1 - 1e-12)` before inverse projection.
 The contract guarantees semantic parity, not identical outputs from the same
 integer seed in different runtimes. Conformance fixtures provide explicit
 uniform fractions so each implementation can test the same draws without
-standardizing a cross-language PRNG.
+standardizing a cross-language PRNG. Within one package version, supplying the
+same sequence of uniform results produces deterministic behavior. The project
+does not promise that a caller's integer seed will produce identical profiles
+after an algorithm or model change in a later package version.
 
 ## Big Five And Conflict Resolution
 

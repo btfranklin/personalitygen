@@ -21,6 +21,7 @@
 - Tests: `pdm run -p packages/python test`
 - Lint: `pdm run -p packages/python lint`
 - Type check: `pdm run -p packages/python typecheck`
+- Complete Python check: `pdm run -p packages/python check`
 - TypeScript install: `npm ci --prefix packages/typescript`
 - TypeScript checks: `npm run --prefix packages/typescript check`
 

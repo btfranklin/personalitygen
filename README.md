@@ -67,8 +67,7 @@ docs/            Architecture, quality, usage, and decisions
 
 ```bash
 pdm install -p packages/python --group dev
-pdm run -p packages/python test
-pdm run -p packages/python lint
+pdm run -p packages/python check
 
 cd packages/typescript
 npm ci

@@ -8,7 +8,7 @@ export interface RandomOptions {
   readonly rng?: RandomSource;
 }
 
-const DEFAULT_RANDOM_SOURCE: RandomSource = Object.freeze({
+export const DEFAULT_RANDOM_SOURCE: RandomSource = Object.freeze({
   uniform(minimum: number, maximum: number): number {
     return minimum + (maximum - minimum) * Math.random();
   },

@@ -44,11 +44,13 @@ cd packages/typescript && npm ci
 Run both language checks before committing behavior changes:
 
 ```bash
-pdm run -p packages/python test
-pdm run -p packages/python lint
-pdm run -p packages/python typecheck
+pdm run -p packages/python check
 npm run --prefix packages/typescript check
 ```
+
+The Python check runs Ruff, strict mypy, pytest, builds the wheel and source
+distribution, inspects both archives, installs the exact wheel in an isolated
+environment, and executes a public API smoke test.
 
 The TypeScript check runs Biome, TypeScript 7 compilation, Node's built-in test
 runner, all conformance fixtures, TypeScript 6 declaration consumption, package
@@ -60,8 +62,8 @@ because the package does not ship its source tree.
 Verify a freshly built Python distribution with:
 
 ```bash
-pdm build -p packages/python --dest packages/python/package-dist
-pdm run -p packages/python verify-package --dist package-dist
+pdm build -p packages/python
+pdm run -p packages/python verify-package
 ```
 
 The verifier inspects both archives, including `py.typed`, rejects tests and
