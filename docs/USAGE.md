@@ -95,8 +95,8 @@ tools.
 
 ## Runnable Examples
 
-The `examples/` directory contains small scripts that demonstrate typical
-simulation workflows:
+The `packages/python/examples/` directory contains small scripts that
+demonstrate typical simulation workflows:
 
 - `generate_npc.py`: generate a full character and project it into ABBF.
 - `project_big_five_to_abbf.py`: inspect a fixed Big Five-to-ABBF projection.

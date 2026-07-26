@@ -8,7 +8,16 @@ license = {file = "LICENSE"}
 authors = [
     {name = "B.T. Franklin", email = "brandon.franklin@gmail.com"},
 ]
-keywords = ["personality", "big-five", "ocean", "abbf", "simulation"]
+keywords = [
+    "personality",
+    "big-five",
+    "ocean",
+    "abbf",
+    "character-generation",
+    "procedural-generation",
+    "games",
+    "simulation",
+]
 dependencies = []
 classifiers = [
     "Programming Language :: Python :: 3",

@@ -27,13 +27,13 @@ jobs:
               uses: pdm-project/setup-pdm@v4
               with:
                   cache: true
-                  cache-dependency-path: pdm.lock
+                  cache-dependency-path: packages/python/pdm.lock
             - name: Install dependencies
-              run: |
-                  pdm install --group dev
+              working-directory: packages/python
+              run: pdm install --group dev
             - name: Lint with ruff
-              run: |
-                  pdm run lint
+              working-directory: packages/python
+              run: pdm run lint
             - name: Test with pytest
-              run: |
-                  pdm run test
+              working-directory: packages/python
+              run: pdm run test

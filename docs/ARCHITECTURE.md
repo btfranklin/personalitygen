@@ -4,7 +4,7 @@
 
 `personalitygen` generates character personality profiles for games, storytelling, simulations, and tests. Its models are generator-friendly value objects with explicit score contracts and deterministic random sampling when callers supply a seeded random source.
 
-The package is deliberately small:
+The repository is deliberately small. Its current Python implementation has:
 
 - no runtime dependencies
 - Python 3.11+ support
@@ -12,16 +12,22 @@ The package is deliberately small:
 - deterministic generation when a seeded random source is supplied
 - public imports from `personalitygen`
 
-## Module Map
+## Repository Map
 
-- `src/personalitygen/enums.py`: public enum types such as `LifeStage` and `PriorityLevel`.
-- `src/personalitygen/constants.py`: shared numeric bounds for unit-range scores.
-- `src/personalitygen/randomness.py`: the minimal random-source protocol and truncated Gaussian helper.
-- `src/personalitygen/_scoring.py`: internal score validation, signed projection, and vector math helpers.
-- `src/personalitygen/traits.py`: Big Five trait value objects, life-stage sampling configuration, unit-range validation, and aggregate score calculation.
-- `src/personalitygen/personality.py`: full trait configurations, conflict-resolution style derivation, and full personality generation.
-- `src/personalitygen/adaptive.py`: Adaptive Bifurcated Big Five signed-vector profiles, axis metadata, and Big Five projection.
-- `src/personalitygen/__init__.py`: the stable public import surface.
+- `packages/python/`: independently buildable Python distribution, tests, and
+  examples.
+- `docs/`: repository-wide architecture, quality, usage, and decisions.
+
+## Python Module Map
+
+- `packages/python/src/personalitygen/enums.py`: public enum types such as `LifeStage` and `PriorityLevel`.
+- `packages/python/src/personalitygen/constants.py`: shared numeric bounds for unit-range scores.
+- `packages/python/src/personalitygen/randomness.py`: the minimal random-source protocol and truncated Gaussian helper.
+- `packages/python/src/personalitygen/_scoring.py`: internal score validation, signed projection, and vector math helpers.
+- `packages/python/src/personalitygen/traits.py`: Big Five trait value objects, life-stage sampling configuration, unit-range validation, and aggregate score calculation.
+- `packages/python/src/personalitygen/personality.py`: full trait configurations, conflict-resolution style derivation, and full personality generation.
+- `packages/python/src/personalitygen/adaptive.py`: Adaptive Bifurcated Big Five signed-vector profiles, axis metadata, and Big Five projection.
+- `packages/python/src/personalitygen/__init__.py`: the stable public import surface.
 
 ## Dependency Direction
 
@@ -79,7 +85,7 @@ When adding a new trait component:
 
 When adding a new public type:
 
-1. Export it from `src/personalitygen/__init__.py`.
+1. Export it from `packages/python/src/personalitygen/__init__.py`.
 2. Add it to `__all__`.
 3. Add tests for the public import surface.
 

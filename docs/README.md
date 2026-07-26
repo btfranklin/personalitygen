@@ -12,6 +12,13 @@ This directory is the source of truth for repository structure, domain rules, va
 
 ## Fast Orientation
 
-`personalitygen` is a small, dependency-free Python 3.11+ package. Its public API exposes immutable value objects for Big Five traits, conflict-resolution configuration, and ABBF signed-vector profiles. Random generation accepts an optional seeded random source so callers can reproduce game, story, and simulation characters.
+`personalitygen` is organized as a language-neutral repository with
+first-class implementations under `packages/`. The current Python 3.11+
+package is dependency-free and exposes immutable value objects for Big Five
+traits, conflict-resolution configuration, and ABBF signed-vector profiles.
+Random generation accepts an optional seeded random source so callers can
+reproduce game, story, and simulation characters.
 
-Before changing behavior, read the architecture and quality docs, then run `pdm run test` and `pdm run lint`.
+Before changing Python behavior, read the architecture and quality docs, then
+run `pdm run -p packages/python test` and
+`pdm run -p packages/python lint`.

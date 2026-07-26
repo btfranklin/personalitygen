@@ -10,7 +10,10 @@
 ## Completed Cleanup
 
 - `AGENTS.md` has been reduced to a short map and no longer contains unrelated Django, async-task, or Python 3.14-only guidance.
-- Runtime policy is documented as Python 3.11+ to match `pyproject.toml`, README badges, and the CI matrix.
+- Runtime policy is documented as Python 3.11+ to match
+  `packages/python/pyproject.toml`, package badges, and the CI matrix.
+- The Python package, tests, examples, manifest, and lockfile live together
+  under `packages/python/`, leaving the repository root language-neutral.
 - Architecture and quality guidance now live under `docs/`.
 - Score validation and vector math now live in a small internal helper shared by Big Five and ABBF models.
 - Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, ABBF vectors, runnable examples, public exports, and documentation/runtime alignment.

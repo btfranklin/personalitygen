@@ -4,7 +4,7 @@
 
 The package targets Python 3.11 and newer. Keep this aligned in:
 
-- `pyproject.toml` `requires-python`
+- `packages/python/pyproject.toml` `requires-python`
 - README badges and wording
 - GitHub Actions test matrix
 - release/build workflow Python version
@@ -15,7 +15,7 @@ Runtime dependencies should remain empty unless a feature genuinely requires one
 ## Setup
 
 ```bash
-pdm install --group dev
+pdm install -p packages/python --group dev
 ```
 
 ## Validation
@@ -23,11 +23,12 @@ pdm install --group dev
 Run both commands before committing behavior changes:
 
 ```bash
-pdm run test
-pdm run lint
+pdm run -p packages/python test
+pdm run -p packages/python lint
 ```
 
-`pdm run test` runs the offline pytest suite. `pdm run lint` runs Ruff over source and tests.
+The PDM commands above run the offline pytest suite and Ruff over Python source,
+tests, and examples.
 
 ## Test Contracts
 
@@ -53,6 +54,6 @@ Prefer deterministic fake random sources or seeded `random.Random` instances. Ke
 Before release, verify:
 
 1. The test matrix covers every advertised Python version.
-2. `pdm build` succeeds from a clean checkout.
+2. `pdm build -p packages/python` succeeds from a clean checkout.
 3. The generated package includes `py.typed`.
 4. README usage examples still work against the public import surface.

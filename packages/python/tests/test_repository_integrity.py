@@ -8,7 +8,8 @@ from urllib.parse import unquote, urlsplit
 import pytest
 
 
-ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 CORE_DOCUMENTATION = (
     Path("docs/README.md"),
     Path("docs/ARCHITECTURE.md"),
@@ -19,7 +20,10 @@ CORE_DOCUMENTATION = (
 MARKDOWN_SOURCES = (
     Path("AGENTS.md"),
     Path("README.md"),
-    *sorted(path.relative_to(ROOT) for path in (ROOT / "docs").rglob("*.md")),
+    *sorted(
+        path.relative_to(REPOSITORY_ROOT)
+        for path in (REPOSITORY_ROOT / "docs").rglob("*.md")
+    ),
 )
 INLINE_LINK_DESTINATION = re.compile(
     r"\]\(\s*(?:<(?P<bracketed>[^>\n]+)>|(?P<bare>[^\s)\n]+))"
@@ -56,25 +60,27 @@ def local_link_target(source: Path, destination: str) -> Path | None:
 
     path = Path(unquote(parsed.path))
     if path.is_absolute():
-        return ROOT / path.relative_to("/")
+        return REPOSITORY_ROOT / path.relative_to("/")
     return source.parent / path
 
 
 def test_core_documentation_files_exist() -> None:
     for relative_path in CORE_DOCUMENTATION:
-        assert (ROOT / relative_path).is_file(), f"Missing {relative_path}"
+        assert (REPOSITORY_ROOT / relative_path).is_file(), (
+            f"Missing {relative_path}"
+        )
 
 
 @pytest.mark.parametrize("relative_path", MARKDOWN_SOURCES, ids=str)
 def test_local_markdown_links_resolve(relative_path: Path) -> None:
-    source = ROOT / relative_path
+    source = REPOSITORY_ROOT / relative_path
     markdown = source.read_text(encoding="utf-8")
 
     for destination in markdown_link_destinations(markdown):
         target = local_link_target(source, destination)
         if target is not None:
             resolved_target = target.resolve()
-            assert resolved_target.is_relative_to(ROOT.resolve()), (
+            assert resolved_target.is_relative_to(REPOSITORY_ROOT.resolve()), (
                 f"Local link escapes the repository in {relative_path}: {destination}"
             )
             assert resolved_target.exists(), (
@@ -83,10 +89,13 @@ def test_local_markdown_links_resolve(relative_path: Path) -> None:
 
 
 def test_package_metadata_matches_repository_policy() -> None:
-    with (ROOT / "pyproject.toml").open("rb") as pyproject_file:
+    with (PACKAGE_ROOT / "pyproject.toml").open("rb") as pyproject_file:
         project = tomllib.load(pyproject_file)["project"]
 
     assert project["requires-python"] == ">=3.11"
     assert project["dependencies"] == []
-    assert (ROOT / project["readme"]).is_file()
-    assert (ROOT / project["license"]["file"]).is_file()
+    assert (PACKAGE_ROOT / project["readme"]).is_file()
+    assert (PACKAGE_ROOT / project["license"]["file"]).is_file()
+    assert (PACKAGE_ROOT / "LICENSE").read_text(encoding="utf-8") == (
+        REPOSITORY_ROOT / "LICENSE"
+    ).read_text(encoding="utf-8")

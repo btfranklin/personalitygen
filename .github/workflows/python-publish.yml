@@ -27,6 +27,7 @@ jobs:
                   python-version: "3.11"
             - uses: pdm-project/setup-pdm@v4
             - name: Build package
+              working-directory: packages/python
               run: pdm build
             - name: Publish package with Trusted Publishing
               uses: pypa/gh-action-pypi-publish@release/v1
