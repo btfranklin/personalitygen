@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from personalitygen import AdaptiveBifurcatedProfile, BigFiveTraits
-from personalitygen.traits import (
+from personalitygen import (
+    AdaptiveBifurcatedProfile,
     BigFiveAgreeableness,
     BigFiveConscientiousness,
     BigFiveExtraversion,
     BigFiveNeuroticism,
     BigFiveOpenness,
+    BigFiveTraits,
 )
 
 

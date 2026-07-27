@@ -35,6 +35,7 @@ const TRAIT_NAMES: readonly TraitName[] = Object.freeze([
   "neuroticism",
 ]);
 
+// Exported for compiled conformance tests; the package export map keeps this module internal.
 export const CONFLICT_STYLE_COEFFICIENTS: Readonly<
   Record<ConflictStyle, StyleCoefficients>
 > = Object.freeze({

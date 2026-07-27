@@ -46,6 +46,7 @@ function sampleTrait(
   ];
 }
 
+// Exported for compiled conformance tests; the package export map keeps this module internal.
 export const TRAIT_SAMPLING_CONFIGURATIONS = Object.freeze({
   openness: Object.freeze({
     standardDeviation: 0.16,

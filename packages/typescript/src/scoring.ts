@@ -70,10 +70,13 @@ export function dotProduct(left: readonly number[], right: readonly number[]): n
   }
   validateSignedRange(...left);
   validateSignedRange(...right);
-  return left.reduce(
-    (total, leftValue, index) => total + leftValue * (right[index] ?? 0),
-    0,
-  );
+  return left.reduce((total, leftValue, index) => {
+    const rightValue = right[index];
+    if (rightValue === undefined) {
+      throw new RangeError("Vectors must have the same length.");
+    }
+    return total + leftValue * rightValue;
+  }, 0);
 }
 
 export function cosineSimilarity(

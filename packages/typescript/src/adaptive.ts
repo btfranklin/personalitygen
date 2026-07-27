@@ -66,6 +66,7 @@ type AxisDefinition = Readonly<{
   readonly negativePole: Pole;
 }>;
 
+// Exported for compiled conformance tests; the package export map keeps this module internal.
 export const AXIS_DEFINITIONS: readonly AxisDefinition[] = Object.freeze([
   Object.freeze({
     field: "orderScore",

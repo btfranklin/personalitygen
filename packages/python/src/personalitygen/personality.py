@@ -1,4 +1,4 @@
-"""Top-level personality configuration models."""
+"""Big Five personality and conflict-resolution models."""
 
 from __future__ import annotations
 
