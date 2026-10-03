@@ -176,37 +176,27 @@ export class AdaptiveBifurcatedProfile {
   }
 
   static fromBigFive(traits: BigFiveTraits): AdaptiveBifurcatedProfile {
-    const openness = unitToSigned(traits.openness.score);
-    const conscientiousness = unitToSigned(traits.conscientiousness.score);
-    const extraversion = unitToSigned(traits.extraversion.score);
-    const agreeableness = unitToSigned(traits.agreeableness.score);
-    const neuroticism = unitToSigned(traits.neuroticism.score);
+    const scores = {
+      openness: unitToSigned(traits.openness.score),
+      conscientiousness: unitToSigned(traits.conscientiousness.score),
+      extraversion: unitToSigned(traits.extraversion.score),
+      agreeableness: unitToSigned(traits.agreeableness.score),
+      neuroticism: unitToSigned(traits.neuroticism.score),
+    };
+    const project = (domain: Domain): number =>
+      weightedSignedAverage(
+        ...Object.entries(ABBF_PROJECTION_COEFFICIENTS[domain]).map(
+          ([name, coefficient]) =>
+            [scores[name as keyof typeof scores], coefficient] as const,
+        ),
+      );
 
     return new AdaptiveBifurcatedProfile({
-      orderScore: weightedSignedAverage([
-        openness,
-        ABBF_PROJECTION_COEFFICIENTS.order.openness,
-      ]),
-      chaosScore: weightedSignedAverage(
-        [agreeableness, ABBF_PROJECTION_COEFFICIENTS.chaos.agreeableness],
-        [conscientiousness, ABBF_PROJECTION_COEFFICIENTS.chaos.conscientiousness],
-        [neuroticism, ABBF_PROJECTION_COEFFICIENTS.chaos.neuroticism],
-      ),
-      cooperationScore: weightedSignedAverage(
-        [extraversion, ABBF_PROJECTION_COEFFICIENTS.cooperation.extraversion],
-        [agreeableness, ABBF_PROJECTION_COEFFICIENTS.cooperation.agreeableness],
-      ),
-      conflictScore: weightedSignedAverage(
-        [agreeableness, ABBF_PROJECTION_COEFFICIENTS.conflict.agreeableness],
-        [neuroticism, ABBF_PROJECTION_COEFFICIENTS.conflict.neuroticism],
-        [openness, ABBF_PROJECTION_COEFFICIENTS.conflict.openness],
-        [conscientiousness, ABBF_PROJECTION_COEFFICIENTS.conflict.conscientiousness],
-      ),
-      competitionScore: weightedSignedAverage(
-        [conscientiousness, ABBF_PROJECTION_COEFFICIENTS.competition.conscientiousness],
-        [agreeableness, ABBF_PROJECTION_COEFFICIENTS.competition.agreeableness],
-        [extraversion, ABBF_PROJECTION_COEFFICIENTS.competition.extraversion],
-      ),
+      orderScore: project(AdaptiveBifurcatedDomain.Order),
+      chaosScore: project(AdaptiveBifurcatedDomain.Chaos),
+      cooperationScore: project(AdaptiveBifurcatedDomain.Cooperation),
+      conflictScore: project(AdaptiveBifurcatedDomain.Conflict),
+      competitionScore: project(AdaptiveBifurcatedDomain.Competition),
     });
   }
 
