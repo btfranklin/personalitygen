@@ -19,8 +19,20 @@
       "selections": [
         {"uniformFraction": 0.0, "expected": "avoiding"},
         {"uniformFraction": 0.2, "expected": "avoiding"},
+        {"uniformFraction": 0.3749999999, "expected": "avoiding"},
+        {"uniformFraction": 0.375, "expected": "avoiding"},
+        {"uniformFraction": 0.3750000001, "expected": "obliging"},
         {"uniformFraction": 0.49, "expected": "obliging"},
-        {"uniformFraction": 0.8, "expected": "dominating"}
+        {"uniformFraction": 0.4999999999, "expected": "obliging"},
+        {"uniformFraction": 0.5, "expected": "obliging"},
+        {"uniformFraction": 0.5000000001, "expected": "integrating"},
+        {"uniformFraction": 0.7499999999, "expected": "integrating"},
+        {"uniformFraction": 0.75, "expected": "integrating"},
+        {"uniformFraction": 0.7500000001, "expected": "dominating"},
+        {"uniformFraction": 0.8, "expected": "dominating"},
+        {"uniformFraction": 0.8749999999, "expected": "dominating"},
+        {"uniformFraction": 0.875, "expected": "dominating"},
+        {"uniformFraction": 0.8750000001, "expected": "compromising"}
       ]
     },
     {

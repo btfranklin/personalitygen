@@ -141,10 +141,10 @@ function weightedChoice(
   if (!Number.isFinite(draw) || draw < 0 || draw > total) {
     throw new RangeError("RandomSource.uniform returned a value out of range.");
   }
-  let threshold = draw;
+  let cumulative = 0;
   for (const style of CONFLICT_RESOLUTION_STYLES) {
-    threshold -= weights[style];
-    if (threshold <= 0) {
+    cumulative += weights[style];
+    if (draw <= cumulative) {
       return style;
     }
   }

@@ -32,7 +32,9 @@ def _weighted_choice(
     ):
         raise ValueError("weights must be finite and non-negative")
     source = rng if rng is not None else random
-    total = sum(weights.values())
+    total = 0.0
+    for weight in weights.values():
+        total += weight
     if total <= 0.0:
         weights = {style: 1.0 for style in weights}
         total = float(len(weights))
@@ -44,9 +46,10 @@ def _weighted_choice(
         or threshold > total
     ):
         raise ValueError("RandomSource.uniform returned a value out of range")
+    cumulative = 0.0
     for style, weight in weights.items():
-        threshold -= weight
-        if threshold <= 0.0:
+        cumulative += weight
+        if threshold <= cumulative:
             return style
     return next(reversed(weights))
 
@@ -179,16 +182,13 @@ def _conflict_style_weights(
         "agreeableness": traits.agreeableness.score,
         "neuroticism": traits.neuroticism.score,
     }
-    return {
-        style: max(
-            sum(
-                trait_scores[trait_name] * coefficient
-                for trait_name, coefficient in coefficients.items()
-            ),
-            _CONFLICT_MINIMUM_WEIGHT,
-        )
-        for style, coefficients in _CONFLICT_STYLE_COEFFICIENTS.items()
-    }
+    weights = {}
+    for style, coefficients in _CONFLICT_STYLE_COEFFICIENTS.items():
+        level = 0.0
+        for trait_name, score in trait_scores.items():
+            level += score * coefficients[trait_name]
+        weights[style] = max(level, _CONFLICT_MINIMUM_WEIGHT)
+    return weights
 
 
 _STYLE_TO_CONCERNS: dict[

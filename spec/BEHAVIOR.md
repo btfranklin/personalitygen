@@ -17,7 +17,8 @@ documentation agree.
 
 - Big Five component and aggregate scores are finite numbers in `0.0..1.0`.
 - Every Big Five trait has exactly three components. Its aggregate score is
-  their arithmetic mean.
+  their arithmetic mean. Add components from left to right in their declared
+  order, starting from zero, then divide by three.
 - ABBF scores are finite numbers in `-1.0..1.0`.
 - Weighted ABBF projections divide by the sum of absolute coefficient weights
   and clamp the result to the signed range.
@@ -55,9 +56,17 @@ defined in `model.json`.
 
 Conflict styles are evaluated in the order recorded in `model.json`. Each raw
 style level is a weighted sum of the five aggregate trait scores, then floored
-to `0.1` so counter-indicated styles remain reachable. Weighted selection maps
-a uniform draw across the sum of the final weights. Concern-for-self and
-concern-for-others priorities are fixed mappings.
+to `0.1` so counter-indicated styles remain reachable. Add weighted terms from
+left to right in canonical Big Five order, starting from zero. Add final
+weights from left to right in style order for both the total and cumulative
+cutoffs. These explicit operations keep floating-point results consistent
+across runtimes.
+
+Weighted selection draws uniformly from zero through the total weight. Select
+the first style whose cumulative cutoff is greater than or equal to the draw.
+An exact cutoff belongs to the style that ends at that cutoff. Zero selects
+the first style; the total selects the last style. Concern-for-self and concern-for-others
+priorities are fixed mappings.
 
 ## Adaptive Bifurcated Big Five
 

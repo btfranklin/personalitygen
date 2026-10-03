@@ -33,7 +33,10 @@ def validate_signed_range(*values: float) -> None:
 
 def component_average_score(*values: float) -> float:
     validate_unit_range(*values)
-    return sum(values) / len(values)
+    total = 0.0
+    for value in values:
+        total += value
+    return total / len(values)
 
 
 def unit_to_signed(value: float) -> float:
