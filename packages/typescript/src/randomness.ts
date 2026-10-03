@@ -14,19 +14,38 @@ export const DEFAULT_RANDOM_SOURCE: RandomSource = Object.freeze({
   },
 });
 
-function errorFunction(value: number): number {
-  const sign = value < 0 ? -1 : 1;
-  const magnitude = Math.abs(value);
-  const t = 1 / (1 + 0.3275911 * magnitude);
-  const polynomial =
-    ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
-      0.254829592) *
-    t;
-  return sign * (1 - polynomial * Math.exp(-(magnitude * magnitude)));
-}
+// Normal tail ratios at 0, 2, 4, 6, and 8 standard deviations.
+// Marsaglia (2004): https://doi.org/10.18637/jss.v011.i04
+const NORMAL_TAIL_RATIOS = [
+  1.2533141373155003, 0.4213692292880545, 0.23665238291356067, 0.16237766089686745,
+  0.1231319632579323,
+] as const;
 
 function normalCdf(value: number, mean: number, standardDeviation: number): number {
-  return 0.5 * (1 + errorFunction((value - mean) / (standardDeviation * Math.SQRT2)));
+  const standardized = (value - mean) / standardDeviation;
+  if (standardized === 0) return 0.5;
+  // Beyond these bounds the tail is smaller than CDF_EPSILON.
+  if (standardized <= -8) return 0;
+  if (standardized >= 8) return 1;
+
+  const magnitude = Math.abs(standardized);
+  const index = Math.floor((magnitude + 1) / 2);
+  const center = 2 * index;
+  const offset = magnitude - center;
+  let even = NORMAL_TAIL_RATIOS[index] as number;
+  let odd = center * even - 1;
+  let power = 1;
+  let previous = even;
+  let sum = even + offset * odd;
+  for (let order = 2; sum !== previous; order += 2) {
+    even = (even + center * odd) / order;
+    odd = (odd + center * even) / (order + 1);
+    power *= offset * offset;
+    previous = sum;
+    sum += power * (even + offset * odd);
+  }
+  const tail = (sum * Math.exp(-0.5 * magnitude * magnitude)) / Math.sqrt(2 * Math.PI);
+  return standardized < 0 ? tail : 1 - tail;
 }
 
 function inverseStandardNormal(probability: number): number {
