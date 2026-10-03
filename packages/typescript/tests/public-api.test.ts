@@ -23,13 +23,20 @@ test("public value objects are immutable", () => {
 });
 
 test("random personality generation uses the supplied random source", () => {
+  let calls = 0;
   const personality = BigFivePersonality.random(LifeStage.Adult, {
     rng: {
       uniform(minimum, maximum) {
-        return minimum + (maximum - minimum) * 0.5;
+        calls += 1;
+        return calls === 16 ? maximum : minimum + (maximum - minimum) * 0.5;
       },
     },
   });
+  assert.equal(calls, 16);
+  assert.equal(
+    personality.conflictResolution.style,
+    BigFiveConflictResolutionStyle.Compromising,
+  );
   assert.ok(Object.isFrozen(personality));
   assert.ok(Object.isFrozen(personality.traits));
   assert.ok(Object.isFrozen(personality.conflictResolution));

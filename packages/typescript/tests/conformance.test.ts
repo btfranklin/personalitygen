@@ -24,6 +24,7 @@ import {
   BigFiveExtraversion,
   BigFiveNeuroticism,
   BigFiveOpenness,
+  BigFivePersonality,
   BigFiveTraits,
   type LifeStage,
   type RandomSource,
@@ -139,7 +140,9 @@ function assertClose(actual: number, expected: number, tolerance: number): void 
   );
 }
 
-function fractionSource(fractions: readonly number[]): RandomSource {
+function fractionSource(
+  fractions: readonly number[],
+): RandomSource & { assertConsumed(): void } {
   let index = 0;
   return {
     uniform(minimum, maximum) {
@@ -147,6 +150,9 @@ function fractionSource(fractions: readonly number[]): RandomSource {
       assert.notEqual(fraction, undefined, "random fixture was exhausted");
       index += 1;
       return minimum + (maximum - minimum) * (fraction as number);
+    },
+    assertConsumed() {
+      assert.equal(index, fractions.length, "random fixture has unused draws");
     },
   };
 }
@@ -197,6 +203,43 @@ function profile(vector: readonly number[]): AdaptiveBifurcatedProfile {
     conflictScore: vector[3] as number,
     competitionScore: vector[4] as number,
   });
+}
+
+interface LifeStageSamplingCase {
+  readonly lifeStage: LifeStage;
+  readonly uniformFractions: readonly number[];
+  readonly expected: Readonly<Record<string, readonly number[]>>;
+}
+
+interface PersonalitySamplingCase extends LifeStageSamplingCase {
+  readonly expectedConflictResolution: {
+    readonly style: string;
+    readonly concernForSelf: string;
+    readonly concernForOthers: string;
+  };
+}
+
+function assertTraitComponents(
+  traits: BigFiveTraits,
+  expected: Readonly<Record<string, readonly number[]>>,
+): void {
+  for (const [traitName, componentProperties] of Object.entries(
+    TRAIT_COMPONENT_PROPERTIES,
+  )) {
+    const trait = traits[
+      traitName as keyof typeof TRAIT_COMPONENT_PROPERTIES
+    ] as unknown as Readonly<Record<string, number>>;
+    const values = expected[traitName] as readonly number[];
+    Object.values(componentProperties).forEach((propertyName, index) => {
+      const actual = trait[propertyName];
+      assert.equal(
+        typeof actual,
+        "number",
+        `${traitName}.${propertyName} is not a numeric public property`,
+      );
+      assertClose(actual as number, values[index] as number, gaussianTolerance);
+    });
+  }
 }
 
 test("implementation constants match the language-neutral model", () => {
@@ -373,43 +416,33 @@ test("truncated Gaussian fixtures", () => {
 
 test("life-stage generation fixtures", () => {
   const fixtures = loadJson<{
-    readonly cases: readonly {
-      readonly lifeStage: LifeStage;
-      readonly uniformFractions: readonly number[];
-      readonly expected: Readonly<Record<string, readonly number[]>>;
-    }[];
+    readonly cases: readonly LifeStageSamplingCase[];
   }>(`conformance/${CONFORMANCE_FIXTURES.lifeStageSampling}`);
   for (const fixture of fixtures.cases) {
-    const traits = BigFiveTraits.random(fixture.lifeStage, {
-      rng: fractionSource(fixture.uniformFractions),
-    });
-    const actual = Object.fromEntries(
-      Object.entries(TRAIT_COMPONENT_PROPERTIES).map(
-        ([traitName, componentProperties]) => {
-          const trait = traits[
-            traitName as keyof typeof TRAIT_COMPONENT_PROPERTIES
-          ] as unknown as Readonly<Record<string, number>>;
-          return [
-            traitName,
-            Object.values(componentProperties).map((propertyName) => {
-              const value = trait[propertyName];
-              assert.equal(
-                typeof value,
-                "number",
-                `${traitName}.${propertyName} is not a numeric public property`,
-              );
-              return value as number;
-            }),
-          ];
-        },
-      ),
+    const rng = fractionSource(fixture.uniformFractions);
+    const traits = BigFiveTraits.random(fixture.lifeStage, { rng });
+    rng.assertConsumed();
+    assertTraitComponents(traits, fixture.expected);
+  }
+});
+
+test("full personality generation consumes the shared draw sequence", () => {
+  const fixtures = loadJson<{
+    readonly personalityCases: readonly PersonalitySamplingCase[];
+  }>(`conformance/${CONFORMANCE_FIXTURES.lifeStageSampling}`);
+  for (const fixture of fixtures.personalityCases) {
+    const rng = fractionSource(fixture.uniformFractions);
+    const personality = BigFivePersonality.random(fixture.lifeStage, { rng });
+    rng.assertConsumed();
+    assertTraitComponents(personality.traits, fixture.expected);
+    assert.deepEqual(
+      {
+        style: personality.conflictResolution.style,
+        concernForSelf: personality.conflictResolution.concernForSelf,
+        concernForOthers: personality.conflictResolution.concernForOthers,
+      },
+      fixture.expectedConflictResolution,
     );
-    for (const [name, values] of Object.entries(actual)) {
-      const expected = fixture.expected[name] as readonly number[];
-      values.forEach((value, index) => {
-        assertClose(value, expected[index] as number, gaussianTolerance);
-      });
-    }
   }
 });
 

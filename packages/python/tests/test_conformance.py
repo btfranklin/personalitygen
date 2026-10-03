@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +14,7 @@ from personalitygen import (
     BigFiveExtraversion,
     BigFiveNeuroticism,
     BigFiveOpenness,
+    BigFivePersonality,
     BigFiveTraits,
     LifeStage,
     PriorityLevel,
@@ -73,11 +73,16 @@ GAUSSIAN_TOLERANCE = MODEL["tolerances"]["gaussian"]
 
 class FractionRandom:
     def __init__(self, *fractions: float) -> None:
-        self._fractions: Iterator[float] = iter(fractions)
+        self._fractions = fractions
+        self._index = 0
 
     def uniform(self, minimum: float, maximum: float) -> float:
-        fraction = next(self._fractions)
+        fraction = self._fractions[self._index]
+        self._index += 1
         return minimum + ((maximum - minimum) * fraction)
+
+    def assert_consumed(self) -> None:
+        assert self._index == len(self._fractions)
 
 
 def flat_traits(scores: dict[str, float]) -> BigFiveTraits:
@@ -265,15 +270,34 @@ def test_gaussian_sampling_conformance() -> None:
 def test_life_stage_sampling_conformance() -> None:
     fixture = load_json(CONFORMANCE_ROOT / "life-stage-sampling.json")
     for case in fixture["cases"]:
-        traits = BigFiveTraits.random(
-            LifeStage(case["lifeStage"]),
-            rng=FractionRandom(*case["uniformFractions"]),
-        )
+        rng = FractionRandom(*case["uniformFractions"])
+        traits = BigFiveTraits.random(LifeStage(case["lifeStage"]), rng=rng)
+        rng.assert_consumed()
         for trait_name, actual in trait_components(traits).items():
             assert actual == pytest.approx(
                 case["expected"][trait_name],
                 abs=GAUSSIAN_TOLERANCE,
             )
+
+
+def test_full_personality_sampling_conformance() -> None:
+    fixture = load_json(CONFORMANCE_ROOT / "life-stage-sampling.json")
+    for case in fixture["personalityCases"]:
+        rng = FractionRandom(*case["uniformFractions"])
+        personality = BigFivePersonality.random(
+            LifeStage(case["lifeStage"]), rng=rng
+        )
+        rng.assert_consumed()
+        for name, actual in trait_components(personality.traits).items():
+            assert actual == pytest.approx(
+                case["expected"][name], abs=GAUSSIAN_TOLERANCE
+            )
+        conflict = personality.conflict_resolution
+        assert {
+            "style": conflict.style.value,
+            "concernForSelf": conflict.concern_for_self.value,
+            "concernForOthers": conflict.concern_for_others.value,
+        } == case["expectedConflictResolution"]
 
 
 def test_conflict_resolution_conformance() -> None:
