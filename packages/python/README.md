@@ -21,7 +21,7 @@ conventional Big Five (OCEAN) profiles and Adaptive Bifurcated Big Five (ABBF) s
 
 - Big Five traits: openness, conscientiousness, extraversion, agreeableness, neuroticism.
 - Each trait is composed of three sub-traits and an aggregate score.
-- Life stage influences distribution means and standard deviations for sampling.
+- Life stage changes sampling means. Standard deviation is fixed per trait.
 - Conflict-resolution style is selected from avoiding, obliging, integrating, dominating, or compromising based on trait scores.
 - ABBF profiles use five signed axes in chart order: order, chaos, cooperation, conflict, and competition.
 - Positive ABBF values select the chart's left pole; negative values select the chart's right pole.
