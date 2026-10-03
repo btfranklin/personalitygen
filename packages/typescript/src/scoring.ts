@@ -88,10 +88,32 @@ export function cosineSimilarity(
   }
   validateSignedRange(...left);
   validateSignedRange(...right);
-  const leftNorm = Math.sqrt(left.reduce((total, value) => total + value * value, 0));
-  const rightNorm = Math.sqrt(right.reduce((total, value) => total + value * value, 0));
-  if (leftNorm === 0 || rightNorm === 0) {
+  const leftScale = left.reduce(
+    (maximum, value) => Math.max(maximum, Math.abs(value)),
+    0,
+  );
+  const rightScale = right.reduce(
+    (maximum, value) => Math.max(maximum, Math.abs(value)),
+    0,
+  );
+  if (leftScale === 0 || rightScale === 0) {
     return 0;
   }
-  return dotProduct(left, right) / (leftNorm * rightNorm);
+
+  const scaledLeft = left.map((value) => value / leftScale);
+  const scaledRight = right.map((value) => value / rightScale);
+  const leftNorm = Math.sqrt(
+    scaledLeft.reduce((total, value) => total + value * value, 0),
+  );
+  const rightNorm = Math.sqrt(
+    scaledRight.reduce((total, value) => total + value * value, 0),
+  );
+  const dot = scaledLeft.reduce((total, value, index) => {
+    const rightValue = scaledRight[index];
+    if (rightValue === undefined) {
+      throw new RangeError("Vectors must have the same length.");
+    }
+    return total + value * rightValue;
+  }, 0);
+  return Math.max(-1, Math.min(1, dot / (leftNorm * rightNorm)));
 }

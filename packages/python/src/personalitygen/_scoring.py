@@ -86,8 +86,21 @@ def cosine_similarity(
     validate_signed_range(*left)
     validate_signed_range(*right)
 
-    left_norm = math.sqrt(sum(value * value for value in left))
-    right_norm = math.sqrt(sum(value * value for value in right))
-    if left_norm == 0.0 or right_norm == 0.0:
+    left_scale = max((abs(value) for value in left), default=0.0)
+    right_scale = max((abs(value) for value in right), default=0.0)
+    if left_scale == 0.0 or right_scale == 0.0:
         return 0.0
-    return dot_product(left, right) / (left_norm * right_norm)
+
+    scaled_left = [value / left_scale for value in left]
+    scaled_right = [value / right_scale for value in right]
+    left_norm = math.sqrt(sum(value * value for value in scaled_left))
+    right_norm = math.sqrt(sum(value * value for value in scaled_right))
+    similarity = sum(
+        left_value * right_value
+        for left_value, right_value in zip(
+            scaled_left,
+            scaled_right,
+            strict=True,
+        )
+    ) / (left_norm * right_norm)
+    return _clamp(similarity, -1.0, 1.0)
