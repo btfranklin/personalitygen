@@ -73,6 +73,11 @@ pdm run -p packages/python check
 npm run --prefix packages/typescript check
 ```
 
+Both checks also run the examples under top-level `examples/`, including the
+RPG party and its game-rule tests. Examples are excluded from published
+artifacts. See the [examples guide](../examples/README.md) for individual run
+commands. The package verifiers reject example files in published artifacts.
+
 The Python check runs Ruff, strict mypy, pytest, builds the wheel and source
 distribution, inspects both archives, installs the exact wheel in an isolated
 environment, and executes a public API smoke test.

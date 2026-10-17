@@ -1,8 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./examples",
-    "outDir": "./.example-dist",
+    "rootDir": "../../examples/typescript",
+    "outDir": "../../examples/.example-dist",
     "types": ["node"],
     "declaration": false,
     "declarationMap": false,
@@ -10,5 +10,5 @@
     "inlineSources": false,
     "noEmit": false
   },
-  "include": ["examples/**/*.ts"]
+  "include": ["../../examples/typescript/**/*.ts"]
 }

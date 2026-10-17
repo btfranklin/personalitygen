@@ -52,7 +52,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "../../examples/python"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
@@ -69,7 +69,7 @@ excludes = ["tests/**"]
 [tool.pdm.scripts]
 docs-check = {cmd = "perfect-doc check --offline .", working_dir = "../.."}
 test = "pytest"
-lint = "ruff check src tests examples scripts"
+lint = "ruff check src tests scripts ../../examples/python"
 typecheck = "mypy --strict src tests/typecheck/random_source_consumer.py"
 build-package = "pdm build"
 verify-package = "python scripts/verify_package.py"

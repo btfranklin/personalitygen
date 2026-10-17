@@ -57,8 +57,9 @@ parameters, projections, and discrete outcomes from `spec/`.
 
 ```text
 packages/
-  python/        Python package, tests, and examples
-  typescript/    TypeScript package, tests, and examples
+  python/        Python package and tests
+  typescript/    TypeScript package and tests
+examples/        Runnable Python and TypeScript examples; not published
 spec/            Shared behavioral model and conformance fixtures
 docs/            Architecture, quality, usage, and decisions
 ```

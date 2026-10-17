@@ -6,7 +6,7 @@ import {
   BigFiveNeuroticism,
   BigFiveOpenness,
   BigFiveTraits,
-} from "../dist/index.js";
+} from "../../packages/typescript/dist/index.js";
 
 const traits = new BigFiveTraits({
   openness: new BigFiveOpenness({

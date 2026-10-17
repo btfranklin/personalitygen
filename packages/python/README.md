@@ -80,4 +80,4 @@ Deeper architecture, quality, and maintenance guidance lives in the
 Simulation recipes live in the
 [usage guide](https://github.com/btfranklin/personalitygen/blob/main/docs/USAGE.md),
 and runnable examples live in
-[`examples/`](https://github.com/btfranklin/personalitygen/tree/main/packages/python/examples).
+[`examples/`](https://github.com/btfranklin/personalitygen/tree/main/examples/python).

@@ -2,7 +2,7 @@ import {
   AdaptiveBifurcatedProfile,
   BigFivePersonality,
   LifeStage,
-} from "../dist/index.js";
+} from "../../packages/typescript/dist/index.js";
 
 const personality = BigFivePersonality.random(LifeStage.Adult);
 const adaptive = AdaptiveBifurcatedProfile.fromBigFive(personality.traits);

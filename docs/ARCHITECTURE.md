@@ -16,10 +16,10 @@ targeting ES2022 and uses frozen classes plus frozen const objects.
 
 ## Repository Map
 
-- `packages/python/`: independently buildable Python distribution, tests, and
-  examples.
-- `packages/typescript/`: independently buildable npm distribution, tests, and
-  examples.
+- `packages/python/`: independently buildable Python distribution and tests.
+- `packages/typescript/`: independently buildable npm distribution and tests.
+- `examples/`: runnable Python and TypeScript examples with separate game
+  rules. Examples are not included in either published package.
 - `spec/`: language-neutral behavioral model and conformance fixtures consumed
   by implementation test suites.
 - `docs/`: repository-wide architecture, quality, usage, and decisions.

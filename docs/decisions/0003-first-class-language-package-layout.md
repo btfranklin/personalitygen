@@ -12,8 +12,11 @@ Python lives under `packages/python/`; future language implementations belong
 beside it rather than under it.
 
 Repository-wide architecture, behavioral decisions, and quality guidance stay
-under top-level `docs/`. Package manifests, source, tests, examples, lockfiles,
-and registry-facing README and license files stay inside their owning package.
+under top-level `docs/`. Package manifests, source, tests, lockfiles, and registry-facing README and
+license files stay inside their owning package. Runnable examples live under
+top-level `examples/python/` and `examples/typescript/`, outside published
+artifacts. Game-specific rules stay in the examples rather than in the
+personality model.
 
 ## Rationale
 

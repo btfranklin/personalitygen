@@ -1,6 +1,10 @@
 import { rmSync } from "node:fs";
 
-const allowedDirectories = new Set(["dist", ".test-dist", ".example-dist"]);
+const allowedDirectories = new Set([
+  "dist",
+  ".test-dist",
+  "../../examples/.example-dist",
+]);
 const directory = process.argv[2];
 
 if (!allowedDirectories.has(directory)) {

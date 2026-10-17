@@ -2,7 +2,7 @@ import {
   AdaptiveBifurcatedDomain,
   AdaptiveBifurcatedPole,
   AdaptiveBifurcatedProfile,
-} from "../dist/index.js";
+} from "../../packages/typescript/dist/index.js";
 
 const profile = (
   vector: readonly [number, number, number, number, number],

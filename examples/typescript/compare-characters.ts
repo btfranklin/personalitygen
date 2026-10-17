@@ -1,4 +1,4 @@
-import { AdaptiveBifurcatedProfile } from "../dist/index.js";
+import { AdaptiveBifurcatedProfile } from "../../packages/typescript/dist/index.js";
 
 const cast = {
   diplomat: new AdaptiveBifurcatedProfile({

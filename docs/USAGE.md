@@ -169,7 +169,12 @@ TypeScript uses `left.cosineSimilarity(right)` and
 
 ## Runnable Examples
 
-Both `packages/python/examples/` and `packages/typescript/examples/` contain
+See the [examples guide](../examples/README.md) for commands and the RPG party
+disagreement. The party scripts generate personalities, while separate rule
+files handle goals, injury, decisions, and trust. Those rules are game design
+choices. Personality similarity is not a conflict probability.
+
+Both `examples/python/` and `examples/typescript/` contain
 parallel scripts that demonstrate typical simulation workflows:
 
 - `generate_npc.py` / `generate-npc.ts`: generate a full character and project
@@ -180,3 +185,8 @@ parallel scripts that demonstrate typical simulation workflows:
   vectors.
 - `select_npcs_by_pole.py` / `select-npcs-by-pole.ts`: filter a small cast by
   dominant ABBF poles.
+- `rpg_party.py` / `rpg-party.ts`: generate a party and handle a disagreement
+  with separate game rules.
+
+Examples are excluded from the Python wheel, source distribution, and npm
+package. Package checks run them from the repository.

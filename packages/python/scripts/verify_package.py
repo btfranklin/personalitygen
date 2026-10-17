@@ -50,8 +50,11 @@ def wheel_version(wheel: Path) -> str:
         for suffix in required_suffixes:
             if not any(path.endswith(suffix) for path in members):
                 raise AssertionError(f"Wheel is missing {suffix}")
-        if any("/tests/" in f"/{path}" or "/spec/" in f"/{path}" for path in members):
-            raise AssertionError("Wheel contains test or specification files")
+        if any(
+            part in {"tests", "spec", "examples"}
+            for path in members for part in Path(path).parts
+        ):
+            raise AssertionError("Wheel contains tests, specification, or examples")
 
     version = metadata["Version"]
     if version is None:
@@ -73,8 +76,13 @@ def verify_sdist(sdist: Path, version: str) -> None:
     }:
         if required not in members:
             raise AssertionError(f"Source distribution is missing {required}")
-    if any("/tests/" in f"/{path}" or "/spec/" in f"/{path}" for path in members):
-        raise AssertionError("Source distribution contains test or specification files")
+    if any(
+        part in {"tests", "spec", "examples"}
+        for path in members for part in Path(path).parts
+    ):
+        raise AssertionError(
+            "Source distribution contains tests, specification, or examples"
+        )
 
 
 def verify_isolated_install(wheel: Path) -> None:

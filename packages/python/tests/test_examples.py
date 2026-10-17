@@ -9,11 +9,13 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+EXAMPLES_ROOT = ROOT.parents[1] / "examples" / "python"
 EXAMPLES = (
-    ROOT / "examples" / "generate_npc.py",
-    ROOT / "examples" / "project_big_five_to_abbf.py",
-    ROOT / "examples" / "compare_characters.py",
-    ROOT / "examples" / "select_npcs_by_pole.py",
+    EXAMPLES_ROOT / "generate_npc.py",
+    EXAMPLES_ROOT / "project_big_five_to_abbf.py",
+    EXAMPLES_ROOT / "compare_characters.py",
+    EXAMPLES_ROOT / "select_npcs_by_pole.py",
+    EXAMPLES_ROOT / "rpg_party.py",
 )
 
 
