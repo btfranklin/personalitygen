@@ -7,6 +7,8 @@ for (const example of [
   "compare-characters.js",
   "select-npcs-by-pole.js",
   "rpg-party.js",
+  "mystery-casting.js",
+  "test-population.js",
 ]) {
   const path = fileURLToPath(
     new URL(`../../../examples/.example-dist/${example}`, import.meta.url),
@@ -20,6 +22,15 @@ execFileSync(
     "--test",
     fileURLToPath(
       new URL("../../../examples/.example-dist/rpg-rules.test.js", import.meta.url),
+    ),
+    fileURLToPath(
+      new URL("../../../examples/.example-dist/mystery-rules.test.js", import.meta.url),
+    ),
+    fileURLToPath(
+      new URL(
+        "../../../examples/.example-dist/population-rules.test.js",
+        import.meta.url,
+      ),
     ),
   ],
   { stdio: "inherit" },

@@ -16,6 +16,8 @@ EXAMPLES = (
     EXAMPLES_ROOT / "compare_characters.py",
     EXAMPLES_ROOT / "select_npcs_by_pole.py",
     EXAMPLES_ROOT / "rpg_party.py",
+    EXAMPLES_ROOT / "mystery_casting.py",
+    EXAMPLES_ROOT / "repeatable_population.py",
 )
 
 

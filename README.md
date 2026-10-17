@@ -66,6 +66,9 @@ docs/            Architecture, quality, usage, and decisions
 
 ## Development
 
+See the [examples guide](examples/README.md) for an RPG party disagreement,
+mystery casting, and a repeatable test population in both languages.
+
 ```bash
 pdm install -p packages/python --group dev
 pdm run -p packages/python check

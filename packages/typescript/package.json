@@ -26,6 +26,8 @@
     "test": "npm run build && node scripts/clean-output.mjs .test-dist && tsc -p tsconfig.test.json && node --test .test-dist/*.test.js",
     "examples": "npm run build && node scripts/clean-output.mjs ../../examples/.example-dist && tsc -p tsconfig.examples.json && node scripts/run-examples.mjs",
     "example:rpg": "npm run build && tsc -p tsconfig.examples.json && node ../../examples/.example-dist/rpg-party.js",
+    "example:mystery": "npm run build && tsc -p tsconfig.examples.json && node ../../examples/.example-dist/mystery-casting.js",
+    "example:population": "npm run build && tsc -p tsconfig.examples.json && node ../../examples/.example-dist/test-population.js",
     "verify:package": "node scripts/verify-package.mjs",
     "verify:release-tag": "node scripts/verify-release-tag.mjs",
     "check:core": "npm run docs:check && npm run lint && npm run typecheck && npm run test && npm run examples && npm run typecheck:compat",

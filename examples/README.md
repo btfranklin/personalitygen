@@ -2,7 +2,13 @@
 
 These examples are repository files. They are not included in the Python wheel,
 Python source distribution, or npm package. They use the public personality API.
-The game rules in this directory are examples that a game developer can change.
+The application rules in this directory are examples that a developer can change.
+
+| Example | Main library features |
+| --- | --- |
+| [RPG party disagreement](#rpg-party-disagreement) | Generated traits and conflict styles guide responses. |
+| [Mystery casting](#mystery-casting) | ABBF projection, dominant poles, and vector comparison select a cast. |
+| [Repeatable test population](#repeatable-test-population) | Seeded generation, life stages, and component scores supply test cases. |
 
 ## RPG Party Disagreement
 
@@ -64,6 +70,74 @@ The example does not use personality similarity as a conflict probability.
 Disagreement comes from incompatible preferred actions in this scene. No rule
 changes a generated personality or adds game behavior to the installed library.
 
+## Mystery Casting
+
+Run from the repository root:
+
+```bash
+pdm run -p packages/python python examples/python/mystery_casting.py
+npm run --prefix packages/typescript example:mystery
+```
+
+The example generates 40 adult personalities with seed 42 and projects their
+Big Five traits into ABBF. Separate casting rules select three distinct people:
+
+1. Filter for a dominant proficiency pole above `0.1`, then select the highest
+   competition-axis score as the protagonist.
+2. Select the remaining profile with the highest cosine similarity to the
+   protagonist as the ally.
+3. Select the remaining profile with the lowest cosine similarity to the
+   protagonist as the rival.
+
+Equal scores keep the input order. A pool with fewer than three candidates,
+duplicate names or IDs, or no eligible protagonist fails with a clear error.
+The example does not retry generation or silently lower the threshold.
+
+The output lists each selected character's dominant poles, the selection
+reasons, and all three pairwise similarity scores. The rival has the least
+similar remaining profile; the score can still be positive. A story role is
+assigned by the application. Personality differences do not make a character
+a villain, and similarity is not a conflict probability.
+
+| Responsibility | Python | TypeScript |
+| --- | --- | --- |
+| Generate the pool and print the cast | [mystery_casting.py](python/mystery_casting.py) | [mystery-casting.ts](typescript/mystery-casting.ts) |
+| Filter and select story roles | [mystery_rules.py](python/mystery_rules.py) | [mystery-rules.ts](typescript/mystery-rules.ts) |
+
+## Repeatable Test Population
+
+Run from the repository root:
+
+```bash
+pdm run -p packages/python python examples/python/repeatable_population.py
+npm run --prefix packages/typescript example:population
+```
+
+The example uses seed 42 to generate 30 profiles for each supported life stage:
+child, young adult, and adult. It generates the population again with a fresh
+random source and the same seed, then compares all profiles. A mismatch fails
+the run. It prints the successful repeat check, all five trait means for the
+whole population and each life stage, and counts for all five conflict styles,
+including any zero counts.
+
+Separate selection rules find profiles with anxiety at least `0.7` and profiles
+with sociability at most `0.3`. These are two independent filters on component
+scores, not aggregate neuroticism or extraversion. The report shows each match
+count and up to three profiles with IDs and component scores. An empty result
+stays empty; generation does not retry to fill a test category.
+
+The sample reflects this generator's settings. It is not a demographic forecast.
+The counts and filter thresholds are example choices, not personality model
+rules. Repeated output is stable within the current package version and random
+source; Python and TypeScript do not promise matching output from the same
+seed. Save selected profile values as fixtures for durable tests, since a later
+model or sampling change can change seeded output.
+
+| Responsibility | Python | TypeScript |
+| --- | --- | --- |
+| Verify the repeat run and print the report | [repeatable_population.py](python/repeatable_population.py) | [test-population.ts](typescript/test-population.ts) |
+| Generate groups, report scores, and select cases | [population_rules.py](python/population_rules.py) | [population-rules.ts](typescript/population-rules.ts) |
+
 ## Other Examples
 
 The two language directories also contain equivalent examples for:
@@ -75,4 +149,6 @@ The two language directories also contain equivalent examples for:
 
 Run all Python examples through `pdm run -p packages/python test`. Run all
 TypeScript examples through `npm run --prefix packages/typescript examples`.
-The aggregate checks also run the example game-rule tests.
+Both package aggregate checks also run all examples and their application-rule
+tests. The Python example tests run through pytest. The TypeScript example
+tests run through Node's test runner as part of the `examples` command.
