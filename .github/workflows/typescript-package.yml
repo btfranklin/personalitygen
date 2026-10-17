@@ -20,6 +20,7 @@ jobs:
 
         steps:
             - uses: actions/checkout@v7
+            - uses: ./.github/actions/setup-perfect-doc
             - name: Set up Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v6
               with:

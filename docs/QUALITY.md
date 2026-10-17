@@ -34,12 +34,37 @@ sampling.
 
 ## Setup
 
+Install the native Perfect Doc executable and put it on `PATH`. For Homebrew:
+
+```bash
+brew install btfranklin/tap/perfect-doc
+```
+
+For other systems, use the
+[native release downloads](https://github.com/btfranklin/perfect-doc/releases).
+CI uses a checksum-verified Linux archive through
+`.github/actions/setup-perfect-doc/action.yml`.
+
 ```bash
 pdm install -p packages/python --group dev
 cd packages/typescript && npm ci
 ```
 
 ## Validation
+
+Run the offline documentation check from the repository root after Markdown
+changes:
+
+```bash
+perfect-doc check --offline .
+```
+
+The root `perfect-doc.toml` defines Markdown scope, GitHub heading anchors,
+and local link rules. Generated files are excluded. Routes and external link
+checks are disabled. Both package aggregate checks include this check and
+require the executable on `PATH`. The package commands are
+`pdm run -p packages/python docs-check` and
+`npm run --prefix packages/typescript docs:check`.
 
 Run both language checks before committing behavior changes:
 

@@ -67,12 +67,14 @@ source = "scm"
 excludes = ["tests/**"]
 
 [tool.pdm.scripts]
+docs-check = {cmd = "perfect-doc check --offline .", working_dir = "../.."}
 test = "pytest"
 lint = "ruff check src tests examples scripts"
 typecheck = "mypy --strict src tests/typecheck/random_source_consumer.py"
 build-package = "pdm build"
 verify-package = "python scripts/verify_package.py"
 check = {composite = [
+    "docs-check",
     "lint",
     "typecheck",
     "test",

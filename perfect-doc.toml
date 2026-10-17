@@ -1,0 +1,30 @@
+include = ["**/*.md"]
+exclude = [
+    "**/.git/**",
+    "**/.venv/**",
+    "**/node_modules/**",
+    "**/.pytest_cache/**",
+    "**/.pdm-build/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/release-dist/**",
+    "**/package-dist/**",
+    "**/.test-dist/**",
+    "**/.example-dist/**",
+]
+required_paths = ["README.md", "docs/README.md", "docs/QUALITY.md", "spec/BEHAVIOR.md"]
+
+[markdown]
+dialect = "gfm"
+anchors = "github"
+
+[links]
+index_files = ["index.md", "README.md", "index.html"]
+allow_outside_root = false
+strict_case = true
+
+[routes]
+enabled = false
+
+[network]
+enabled = false

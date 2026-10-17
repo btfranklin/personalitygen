@@ -26,11 +26,18 @@
 - Score validation and vector math now live in a small internal helper shared by Big Five and ABBF models.
 - Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, ABBF vectors, runnable examples, public exports, and documentation/runtime alignment.
 
-## Remaining Pressure Points
+## Deliberate Design Tradeoffs
 
-- Runtime model tables remain explicit inside each implementation, while
-  `spec/model.json` gives tests and other language implementations one
-  canonical table-shaped reference.
+- Each implementation keeps explicit runtime model tables. `spec/model.json`
+  is the canonical reference, and both test suites compare their tables with
+  it and check behavior against shared conformance fixtures.
+- Parameter changes require updates to the specification and both packages.
+  This keeps each package independent and avoids runtime resource loading or
+  a source generation step. For the current small tables, this is an accepted
+  maintenance cost, not an open cleanup task. See the
+  [shared behavioral contract decision](decisions/0004-shared-behavioral-contract.md).
+- Reconsider source generation if the tables grow substantially, change often,
+  or need to support more language implementations.
 
 ## Entropy Controls
 

@@ -79,4 +79,5 @@ Deeper architecture, quality, and maintenance guidance lives in the
 [repository documentation](https://github.com/btfranklin/personalitygen/tree/main/docs).
 Simulation recipes live in the
 [usage guide](https://github.com/btfranklin/personalitygen/blob/main/docs/USAGE.md),
-and runnable examples live in [`examples/`](examples/).
+and runnable examples live in
+[`examples/`](https://github.com/btfranklin/personalitygen/tree/main/packages/python/examples).
