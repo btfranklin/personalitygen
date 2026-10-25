@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any
 
 import pytest
 
+from fixture_data import load_fixture
 from personalitygen import (
     AdaptiveBifurcatedProfile,
     BigFiveAgreeableness,
@@ -62,13 +61,9 @@ EXPECTED_FIXTURES = {
 }
 
 
-def load_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-MODEL = load_json(SPEC_ROOT / "model.json")
-ARITHMETIC_TOLERANCE = MODEL["tolerances"]["arithmetic"]
-GAUSSIAN_TOLERANCE = MODEL["tolerances"]["gaussian"]
+MODEL = load_fixture(SPEC_ROOT / "model.json")
+ARITHMETIC_TOLERANCE = MODEL.mapping("tolerances").number("arithmetic")
+GAUSSIAN_TOLERANCE = MODEL.mapping("tolerances").number("gaussian")
 
 
 class FractionRandom:
@@ -135,22 +130,22 @@ def test_conformance_fixture_set_is_explicit() -> None:
 
 
 def test_model_matches_python_configuration() -> None:
-    assert MODEL["schemaVersion"] == 1
-    assert MODEL["ranges"]["unit"] == [UNIT_RANGE_MIN, UNIT_RANGE_MAX]
-    assert MODEL["ranges"]["traitSample"] == [
+    assert MODEL.value("schemaVersion") == 1
+    assert MODEL.mapping("ranges").value("unit") == [UNIT_RANGE_MIN, UNIT_RANGE_MAX]
+    assert MODEL.mapping("ranges").value("traitSample") == [
         _TRAIT_SAMPLE_MIN,
         UNIT_RANGE_MAX,
     ]
-    assert MODEL["ranges"]["signed"] == [
+    assert MODEL.mapping("ranges").value("signed") == [
         SIGNED_RANGE_MIN,
         SIGNED_RANGE_MAX,
     ]
-    assert MODEL["randomness"] == {
+    assert MODEL.value("randomness") == {
         "cdfEpsilon": _CDF_EPSILON,
         "abbfStandardDeviation": _ABBF_RANDOM_STDDEV,
     }
-    assert MODEL["lifeStages"] == [stage.value for stage in LifeStage]
-    assert MODEL["priorityLevels"] == [level.value for level in PriorityLevel]
+    assert MODEL.value("lifeStages") == [stage.value for stage in LifeStage]
+    assert MODEL.value("priorityLevels") == [level.value for level in PriorityLevel]
 
     trait_configs = {
         "openness": _OPENNESS_CONFIG,
@@ -179,24 +174,24 @@ def test_model_matches_python_configuration() -> None:
         "neuroticism": ["anxiety", "emotional_volatility", "depression"],
     }
     for trait_name, config in trait_configs.items():
-        expected = MODEL["traits"][trait_name]
-        assert expected["components"] == component_names[trait_name]
-        assert config.stddev == expected["standardDeviation"]
+        expected = MODEL.mapping("traits").mapping(trait_name)
+        assert expected.value("components") == component_names[trait_name]
+        assert config.stddev == expected.value("standardDeviation")
         assert {
             stage.value: list(means)
             for stage, means in config.means_by_stage.items()
-        } == expected["means"]
+        } == expected.value("means")
 
-    conflict_model = MODEL["conflictResolution"]
-    assert conflict_model["minimumWeight"] == _CONFLICT_MINIMUM_WEIGHT
-    assert list(conflict_model["styles"]) == [
+    conflict_model = MODEL.mapping("conflictResolution")
+    assert conflict_model.value("minimumWeight") == _CONFLICT_MINIMUM_WEIGHT
+    assert conflict_model.mapping("styles").keys() == [
         style.value for style in BigFiveConflictResolutionStyle
     ]
     for style, coefficients in _CONFLICT_STYLE_COEFFICIENTS.items():
-        expected = conflict_model["styles"][style.value]
-        assert coefficients == expected["coefficients"]
+        expected = conflict_model.mapping("styles").mapping(style.value)
+        assert coefficients == expected.value("coefficients")
         assert [priority.value for priority in _STYLE_TO_CONCERNS[style]] == (
-            expected["concerns"]
+            expected.value("concerns")
         )
 
     assert [
@@ -205,130 +200,134 @@ def test_model_matches_python_configuration() -> None:
             "positivePole": positive.value,
             "negativePole": negative.value,
         }
-        for _, domain, positive, negative in _AXIS_DEFINITIONS
-    ] == MODEL["adaptive"]["axes"]
-    assert _ABBF_PROJECTION_COEFFICIENTS == MODEL["adaptive"]["projection"]
+        for domain, positive, negative in _AXIS_DEFINITIONS
+    ] == MODEL.mapping("adaptive").value("axes")
+    assert _ABBF_PROJECTION_COEFFICIENTS == MODEL.mapping("adaptive").value(
+        "projection"
+    )
 
 
 def test_validation_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "validation.json")
+    fixture = load_fixture(CONFORMANCE_ROOT / "validation.json")
 
-    for score in fixture["unitScores"]["valid"]:
+    for score in fixture.mapping("unitScores").numbers("valid"):
         validate_unit_range(score)
-    for score in fixture["unitScores"]["invalid"]:
+    for score in fixture.mapping("unitScores").numbers("invalid"):
         with pytest.raises(ValueError):
             validate_unit_range(score)
 
-    for score in fixture["signedScores"]["valid"]:
+    for score in fixture.mapping("signedScores").numbers("valid"):
         validate_signed_range(score)
-    for score in fixture["signedScores"]["invalid"]:
+    for score in fixture.mapping("signedScores").numbers("invalid"):
         with pytest.raises(ValueError):
             validate_signed_range(score)
 
     zero_profile = AdaptiveBifurcatedProfile(*(0.0,) * 5)
-    for threshold in fixture["dominantPoleThresholds"]["valid"]:
+    for threshold in fixture.mapping("dominantPoleThresholds").numbers("valid"):
         zero_profile.dominant_poles(threshold=threshold)
-    for threshold in fixture["dominantPoleThresholds"]["invalid"]:
+    for threshold in fixture.mapping("dominantPoleThresholds").numbers("invalid"):
         with pytest.raises(ValueError):
             zero_profile.dominant_poles(threshold=threshold)
 
-    for parameters in fixture["gaussianParameters"]["invalid"]:
+    for parameters in fixture.mapping("gaussianParameters").objects("invalid"):
         with pytest.raises(ValueError):
             random_gaussian(
-                mean=parameters["mean"],
-                stddev=parameters["standardDeviation"],
-                min_value=parameters["minimum"],
-                max_value=parameters["maximum"],
+                mean=parameters.number("mean"),
+                stddev=parameters.number("standardDeviation"),
+                min_value=parameters.number("minimum"),
+                max_value=parameters.number("maximum"),
             )
 
 
 def test_aggregate_scoring_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "aggregate-scoring.json")
-    for case in fixture["cases"]:
-        assert component_average_score(*case["components"]) == pytest.approx(
-            case["expected"],
+    fixture = load_fixture(CONFORMANCE_ROOT / "aggregate-scoring.json")
+    for case in fixture.objects("cases"):
+        assert component_average_score(*case.numbers("components")) == pytest.approx(
+            case.number("expected"),
             abs=ARITHMETIC_TOLERANCE,
         )
 
 
 def test_gaussian_sampling_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "gaussian-sampling.json")
-    for case in fixture["cases"]:
+    fixture = load_fixture(CONFORMANCE_ROOT / "gaussian-sampling.json")
+    for case in fixture.objects("cases"):
         actual = random_gaussian(
-            mean=case["mean"],
-            stddev=case["standardDeviation"],
-            min_value=case["minimum"],
-            max_value=case["maximum"],
-            rng=FractionRandom(case["uniformFraction"]),
+            mean=case.number("mean"),
+            stddev=case.number("standardDeviation"),
+            min_value=case.number("minimum"),
+            max_value=case.number("maximum"),
+            rng=FractionRandom(case.number("uniformFraction")),
         )
         assert actual == pytest.approx(
-            case["expected"],
+            case.number("expected"),
             abs=GAUSSIAN_TOLERANCE,
         )
 
 
 def test_life_stage_sampling_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "life-stage-sampling.json")
-    for case in fixture["cases"]:
-        rng = FractionRandom(*case["uniformFractions"])
-        traits = BigFiveTraits.random(LifeStage(case["lifeStage"]), rng=rng)
+    fixture = load_fixture(CONFORMANCE_ROOT / "life-stage-sampling.json")
+    for case in fixture.objects("cases"):
+        rng = FractionRandom(*case.numbers("uniformFractions"))
+        traits = BigFiveTraits.random(LifeStage(case.string("lifeStage")), rng=rng)
         rng.assert_consumed()
         for trait_name, actual in trait_components(traits).items():
             assert actual == pytest.approx(
-                case["expected"][trait_name],
+                case.mapping("expected").numbers(trait_name),
                 abs=GAUSSIAN_TOLERANCE,
             )
 
 
 def test_full_personality_sampling_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "life-stage-sampling.json")
-    for case in fixture["personalityCases"]:
-        rng = FractionRandom(*case["uniformFractions"])
+    fixture = load_fixture(CONFORMANCE_ROOT / "life-stage-sampling.json")
+    for case in fixture.objects("personalityCases"):
+        rng = FractionRandom(*case.numbers("uniformFractions"))
         personality = BigFivePersonality.random(
-            LifeStage(case["lifeStage"]), rng=rng
+            LifeStage(case.string("lifeStage")), rng=rng
         )
         rng.assert_consumed()
         for name, actual in trait_components(personality.traits).items():
             assert actual == pytest.approx(
-                case["expected"][name], abs=GAUSSIAN_TOLERANCE
+                case.mapping("expected").numbers(name), abs=GAUSSIAN_TOLERANCE
             )
         conflict = personality.conflict_resolution
         assert {
             "style": conflict.style.value,
             "concernForSelf": conflict.concern_for_self.value,
             "concernForOthers": conflict.concern_for_others.value,
-        } == case["expectedConflictResolution"]
+        } == case.value("expectedConflictResolution")
 
 
 def test_conflict_resolution_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "conflict-resolution.json")
-    for case in fixture["cases"]:
-        traits = flat_traits(case["traits"])
+    fixture = load_fixture(CONFORMANCE_ROOT / "conflict-resolution.json")
+    for case in fixture.objects("cases"):
+        traits = flat_traits(case.number_map("traits"))
         actual_weights = {
             style.value: weight
             for style, weight in _conflict_style_weights(traits).items()
         }
         assert actual_weights == pytest.approx(
-            case["weights"],
+            case.number_map("weights"),
             abs=ARITHMETIC_TOLERANCE,
         )
-        for selection in case["selections"]:
+        for selection in case.objects("selections"):
             actual = BigFiveConflictResolutionStyle.random(
                 traits,
-                rng=FractionRandom(selection["uniformFraction"]),
+                rng=FractionRandom(selection.number("uniformFraction")),
             )
-            assert actual.value == selection["expected"]
+            assert actual.value == selection.string("expected")
 
 
 def test_adaptive_projection_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "adaptive.json")
-    for case in fixture["projectionCases"]:
+    fixture = load_fixture(CONFORMANCE_ROOT / "adaptive.json")
+    for case in fixture.objects("projectionCases"):
         signed = {
             trait: (score * 2.0) - 1.0
-            for trait, score in case["bigFive"].items()
+            for trait, score in case.number_map("bigFive").items()
         }
         model_projection = []
-        for coefficients in MODEL["adaptive"]["projection"].values():
+        projection = MODEL.mapping("adaptive").mapping("projection")
+        for axis in projection.object_values():
+            coefficients = axis.number_values()
             weighted_sum = sum(
                 signed[trait] * weight
                 for trait, weight in coefficients.items()
@@ -338,42 +337,42 @@ def test_adaptive_projection_conformance() -> None:
                 max(-1.0, min(1.0, weighted_sum / total_weight))
             )
         assert model_projection == pytest.approx(
-            case["expected"],
+            case.numbers("expected"),
             abs=ARITHMETIC_TOLERANCE,
         )
 
         actual = AdaptiveBifurcatedProfile.from_big_five(
-            flat_traits(case["bigFive"])
+            flat_traits(case.number_map("bigFive"))
         )
         assert actual.vector == pytest.approx(
-            case["expected"],
+            case.numbers("expected"),
             abs=ARITHMETIC_TOLERANCE,
         )
 
 
 def test_adaptive_dominant_pole_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "adaptive.json")
-    for case in fixture["dominantPoleCases"]:
-        profile = AdaptiveBifurcatedProfile(*case["vector"])
+    fixture = load_fixture(CONFORMANCE_ROOT / "adaptive.json")
+    for case in fixture.objects("dominantPoleCases"):
+        profile = AdaptiveBifurcatedProfile(*case.numbers("vector"))
         actual = {
             domain.value: pole.value
             for domain, pole in profile.dominant_poles(
-                threshold=case["threshold"]
+                threshold=case.number("threshold")
             ).items()
         }
-        assert actual == case["expected"]
+        assert actual == case.value("expected")
 
 
 def test_adaptive_vector_math_conformance() -> None:
-    fixture = load_json(CONFORMANCE_ROOT / "adaptive.json")
-    for case in fixture["vectorCases"]:
-        left = AdaptiveBifurcatedProfile(*case["left"])
-        right = AdaptiveBifurcatedProfile(*case["right"])
+    fixture = load_fixture(CONFORMANCE_ROOT / "adaptive.json")
+    for case in fixture.objects("vectorCases"):
+        left = AdaptiveBifurcatedProfile(*case.numbers("left"))
+        right = AdaptiveBifurcatedProfile(*case.numbers("right"))
         assert left.dot_product(right) == pytest.approx(
-            case["dotProduct"],
+            case.number("dotProduct"),
             abs=ARITHMETIC_TOLERANCE,
         )
         assert left.cosine_similarity(right) == pytest.approx(
-            case["cosineSimilarity"],
+            case.number("cosineSimilarity"),
             abs=ARITHMETIC_TOLERANCE,
         )

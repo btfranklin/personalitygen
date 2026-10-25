@@ -69,31 +69,26 @@ class AdaptiveBifurcatedAxis:
 
 _AXIS_DEFINITIONS = (
     (
-        "order_score",
         AdaptiveBifurcatedDomain.ORDER,
         AdaptiveBifurcatedPole.STRATEGIZING,
         AdaptiveBifurcatedPole.IMPROVISATION,
     ),
     (
-        "chaos_score",
         AdaptiveBifurcatedDomain.CHAOS,
         AdaptiveBifurcatedPole.ETHICALITY,
         AdaptiveBifurcatedPole.INSTINCTIVITY,
     ),
     (
-        "cooperation_score",
         AdaptiveBifurcatedDomain.COOPERATION,
         AdaptiveBifurcatedPole.COLLABORATION,
         AdaptiveBifurcatedPole.INDEPENDENCE,
     ),
     (
-        "conflict_score",
         AdaptiveBifurcatedDomain.CONFLICT,
         AdaptiveBifurcatedPole.HARMONIZING,
         AdaptiveBifurcatedPole.UTILITARIANISM,
     ),
     (
-        "competition_score",
         AdaptiveBifurcatedDomain.COMPETITION,
         AdaptiveBifurcatedPole.PROFICIENCY,
         AdaptiveBifurcatedPole.DOMINANCY,
@@ -212,14 +207,11 @@ class AdaptiveBifurcatedProfile:
                 domain=domain,
                 positive_pole=positive_pole,
                 negative_pole=negative_pole,
-                score=getattr(self, field_name),
+                score=score,
             )
-            for (
-                field_name,
-                domain,
-                positive_pole,
-                negative_pole,
-            ) in _AXIS_DEFINITIONS
+            for (domain, positive_pole, negative_pole), score in zip(
+                _AXIS_DEFINITIONS, self.vector, strict=True
+            )
         )
 
     def dominant_poles(

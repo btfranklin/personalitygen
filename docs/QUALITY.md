@@ -99,9 +99,25 @@ pdm run -p packages/python verify-package
 
 The verifier inspects both archives, including `py.typed`, rejects tests and
 shared specification data, installs the exact wheel in an isolated virtual
-environment, and executes a public API smoke test. Strict mypy validation also
-includes a consumer proving that an RNG implementing only `uniform()` satisfies
+environment, and executes a public API smoke test. Strict mypy validation covers
+all Python source, tests, scripts, and examples.
+It also includes a consumer that proves an RNG with only `uniform()` satisfies
 the shipped typed API.
+
+The mypy settings in `packages/python/pyproject.toml` reject explicit `Any`,
+expressions that contain `Any`, untyped generic containers, and untyped functions.
+They also reject `Any` from decorators and missing imports, and report code that
+cannot run. Keep these checks enabled for all Python directories.
+
+At dynamic standard-library boundaries, such as JSON, TOML, argument parsing,
+and module inspection, receive values as `object` or a container of `object`.
+Validate and narrow values before use. Do not use casts to claim a data type
+without a check. Tests for invalid inputs can use a specific type-check
+suppression at the invalid call; give the reason and keep the suppression local.
+
+The fixture reader checks mapping keys and the value types used by each test.
+The package smoke test is a Python file so that mypy can check it before the
+package verifier runs it in an isolated environment.
 
 ## Test Contracts
 

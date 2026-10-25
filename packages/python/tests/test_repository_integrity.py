@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import json
 import re
 import tomllib
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 import pytest
+
+from fixture_data import Fixture, load_fixture
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
@@ -98,12 +99,13 @@ def test_local_markdown_links_resolve(relative_path: Path) -> None:
 
 def test_package_metadata_matches_repository_policy() -> None:
     with (PACKAGE_ROOT / "pyproject.toml").open("rb") as pyproject_file:
-        project = tomllib.load(pyproject_file)["project"]
+        metadata: object = tomllib.load(pyproject_file)
+    project = Fixture(metadata).mapping("project")
 
-    assert project["requires-python"] == ">=3.11"
-    assert project["dependencies"] == []
-    assert (PACKAGE_ROOT / project["readme"]).is_file()
-    assert (PACKAGE_ROOT / project["license"]["file"]).is_file()
+    assert project.value("requires-python") == ">=3.11"
+    assert project.value("dependencies") == []
+    assert (PACKAGE_ROOT / project.string("readme")).is_file()
+    assert (PACKAGE_ROOT / project.mapping("license").string("file")).is_file()
     assert (PACKAGE_ROOT / "LICENSE").read_text(encoding="utf-8") == (
         REPOSITORY_ROOT / "LICENSE"
     ).read_text(encoding="utf-8")
@@ -111,18 +113,15 @@ def test_package_metadata_matches_repository_policy() -> None:
 
 def test_typescript_metadata_matches_repository_policy() -> None:
     typescript_root = REPOSITORY_ROOT / "packages" / "typescript"
-    package = json.loads(
-        (typescript_root / "package.json").read_text(encoding="utf-8")
-    )
-    package_lock = json.loads(
-        (typescript_root / "package-lock.json").read_text(encoding="utf-8")
-    )
+    package = load_fixture(typescript_root / "package.json")
+    package_lock = load_fixture(typescript_root / "package-lock.json")
 
-    assert package["name"] == "personalitygen"
-    assert package["version"] == package_lock["version"]
-    assert package["version"] == package_lock["packages"][""]["version"]
-    assert "dependencies" not in package
-    assert package["devDependencies"]["typescript"].startswith(">=7.")
+    assert package.string("name") == "personalitygen"
+    assert package.string("version") == package_lock.string("version")
+    locked_package = package_lock.mapping("packages").mapping("")
+    assert package.string("version") == locked_package.string("version")
+    assert "dependencies" not in package.keys()
+    assert package.mapping("devDependencies").string("typescript").startswith(">=7.")
     assert (typescript_root / "README.md").is_file()
     assert (typescript_root / "LICENSE").read_text(encoding="utf-8") == (
         REPOSITORY_ROOT / "LICENSE"

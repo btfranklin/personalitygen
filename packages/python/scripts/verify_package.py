@@ -8,10 +8,17 @@ import tarfile
 import tempfile
 import venv
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
 
 
-def parse_arguments() -> argparse.Namespace:
+@dataclass(frozen=True)
+class Arguments:
+    dist: Path
+    expected_version: str | None
+
+
+def parse_arguments() -> Arguments:
     parser = argparse.ArgumentParser(
         description="Inspect and install the built personalitygen package."
     )
@@ -22,7 +29,14 @@ def parse_arguments() -> argparse.Namespace:
         help="Directory containing exactly one wheel and one source archive.",
     )
     parser.add_argument("--expected-version")
-    return parser.parse_args()
+    arguments = parser.parse_args()
+    dist: object = arguments.dist
+    expected_version: object = arguments.expected_version
+    if not isinstance(dist, Path):
+        parser.error("--dist must be a path")
+    if expected_version is not None and not isinstance(expected_version, str):
+        parser.error("--expected-version must be text")
+    return Arguments(dist, expected_version)
 
 
 def only_matching(directory: Path, pattern: str) -> Path:
@@ -104,22 +118,8 @@ def verify_isolated_install(wheel: Path) -> None:
             capture_output=True,
             text=True,
         )
-        smoke_test = """
-from personalitygen import (
-    AdaptiveBifurcatedProfile,
-    BigFiveConflictResolution,
-    BigFiveConflictResolutionStyle,
-    PriorityLevel,
-)
-
-conflict = BigFiveConflictResolution(
-    style=BigFiveConflictResolutionStyle.AVOIDING
-)
-assert conflict.concern_for_self is PriorityLevel.LOW
-assert len(AdaptiveBifurcatedProfile.random().vector) == 5
-"""
         subprocess.run(
-            [python, "-c", smoke_test],
+            [python, Path(__file__).with_name("package_smoke.py").resolve()],
             check=True,
             capture_output=True,
             text=True,
@@ -139,16 +139,8 @@ def main() -> None:
             )
     verify_sdist(sdist, version)
     verify_isolated_install(wheel)
-    print(
-        json.dumps(
-            {
-                "version": version,
-                "wheel": str(wheel),
-                "sdist": str(sdist),
-            },
-            sort_keys=True,
-        )
-    )
+    result = {"version": version, "wheel": str(wheel), "sdist": str(sdist)}
+    print(json.dumps(result, sort_keys=True))
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ EXAMPLES = (
 )
 
 
-@pytest.mark.parametrize("script", EXAMPLES, ids=lambda path: path.name)
+@pytest.mark.parametrize("script", EXAMPLES, ids=[path.name for path in EXAMPLES])
 def test_example_script_runs(script: Path) -> None:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(ROOT / "src")

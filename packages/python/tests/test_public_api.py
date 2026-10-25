@@ -44,5 +44,6 @@ EXPECTED_PUBLIC_API = {
 
 def test_public_api_exports_are_explicit_and_importable() -> None:
     assert set(personalitygen.__all__) == set(EXPECTED_PUBLIC_API)
+    exports: dict[str, object] = vars(personalitygen)
     for name, expected_object in EXPECTED_PUBLIC_API.items():
-        assert getattr(personalitygen, name) is expected_object
+        assert exports[name] is expected_object

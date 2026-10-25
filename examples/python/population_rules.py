@@ -49,12 +49,22 @@ def trait_means(population: Sequence[TestPersona]) -> dict[str, float]:
     """Report all five aggregate trait means for a supplied group."""
     if not population:
         raise ValueError("Cannot report means for an empty population")
-    return {
-        name: mean(
-            getattr(person.personality.traits, name).score for person in population
-        )
-        for name in TRAIT_NAMES
-    }
+    scores: dict[str, list[float]] = {name: [] for name in TRAIT_NAMES}
+    for person in population:
+        traits = person.personality.traits
+        for name, score in zip(
+            TRAIT_NAMES,
+            (
+                traits.openness.score,
+                traits.conscientiousness.score,
+                traits.extraversion.score,
+                traits.agreeableness.score,
+                traits.neuroticism.score,
+            ),
+            strict=True,
+        ):
+            scores[name].append(score)
+    return {name: mean(values) for name, values in scores.items()}
 
 
 def style_counts(population: Sequence[TestPersona]) -> dict[str, int]:

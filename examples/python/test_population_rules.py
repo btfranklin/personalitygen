@@ -1,6 +1,6 @@
 """Check complete repeatability, report totals, and component filtering."""
 
-from dataclasses import asdict, replace
+from dataclasses import replace
 from statistics import mean
 
 import pytest
@@ -17,7 +17,7 @@ from population_rules import (
 def test_population_is_repeatable_and_covers_each_stage() -> None:
     population = generate_population(seed=42, per_stage=3)
     repeated = generate_population(seed=42, per_stage=3)
-    assert [asdict(p) for p in population] == [asdict(p) for p in repeated]
+    assert population == repeated
     assert population != generate_population(seed=43, per_stage=3)
     assert len({p.identifier for p in population}) == len(population) == 9
     for stage in LifeStage:

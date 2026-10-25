@@ -70,7 +70,7 @@ excludes = ["tests/**"]
 docs-check = {cmd = "perfect-doc check --offline .", working_dir = "../.."}
 test = "pytest"
 lint = "ruff check src tests scripts ../../examples/python"
-typecheck = "mypy --strict src tests/typecheck/random_source_consumer.py"
+typecheck = "mypy"
 build-package = "pdm build"
 verify-package = "python scripts/verify_package.py"
 check = {composite = [
@@ -81,3 +81,13 @@ check = {composite = [
     "build-package",
     "verify-package",
 ]}
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src", "tests", "scripts", "../../examples/python"]
+strict = true
+disallow_any_expr = true
+disallow_any_explicit = true
+disallow_any_decorated = true
+disallow_any_unimported = true
+warn_unreachable = true

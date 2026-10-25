@@ -39,9 +39,10 @@ def cast_mystery(candidates: Sequence[Candidate]) -> MysteryCast:
     ]
     if not eligible:
         raise ValueError("No candidate has a proficiency score above 0.1")
-    protagonist = max(
-        eligible, key=lambda candidate: candidate.profile.competition_score
-    )
+    def competition_score(candidate: Candidate) -> float:
+        return candidate.profile.competition_score
+
+    protagonist = max(eligible, key=competition_score)
     remaining = [
         candidate for candidate in candidates if candidate.name != protagonist.name
     ]

@@ -1,7 +1,5 @@
 """Generate repeatable test data and inspect the selected component scores."""
 
-from dataclasses import asdict
-
 from personalitygen import LifeStage
 
 from population_rules import (
@@ -15,9 +13,7 @@ from population_rules import (
 def main() -> None:
     population = generate_population()
     repeated = generate_population()
-    if [asdict(person) for person in population] != [
-        asdict(person) for person in repeated
-    ]:
+    if population != repeated:
         raise AssertionError("Repeated generation changed a profile")
     print(f"Test population: {len(population)} profiles; seed=42; 30 per life stage")
     print("Repeat check: every generated component and conflict style matches.")
