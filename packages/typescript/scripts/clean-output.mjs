@@ -7,7 +7,7 @@ const allowedDirectories = new Set([
 ]);
 const directory = process.argv[2];
 
-if (!allowedDirectories.has(directory)) {
+if (directory === undefined || !allowedDirectories.has(directory)) {
   throw new Error(`Refusing to clean unsupported output directory: ${directory}`);
 }
 

@@ -5,12 +5,15 @@ import { tmpdir } from "node:os";
 import { isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { arrayValue, objectValue, parseJson, stringValue } from "./json-data.mjs";
+
 const packageRoot = fileURLToPath(new URL("..", import.meta.url));
-const packageMetadata = JSON.parse(
-  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+const packageMetadata = objectValue(
+  parseJson(readFileSync(new URL("../package.json", import.meta.url), "utf8")),
 );
 const temporaryDirectory = mkdtempSync(join(tmpdir(), "personalitygen-npm-"));
 
+/** @param {string} name */
 function argumentValue(name) {
   const index = process.argv.indexOf(name);
   if (index === -1) {
@@ -30,15 +33,18 @@ try {
     ["pack", "--json", "--pack-destination", packDestination],
     { cwd: packageRoot, encoding: "utf8" },
   );
-  const packMetadata = JSON.parse(packOutput);
-  const packed = Array.isArray(packMetadata)
-    ? packMetadata[0]
-    : Object.values(packMetadata)[0];
-  assert.ok(packed, "npm pack did not return package metadata");
-  assert.equal(packed.name, "personalitygen");
-  assert.equal(packed.version, packageMetadata.version);
+  const packMetadata = parseJson(packOutput);
+  const entries = Array.isArray(packMetadata)
+    ? arrayValue(packMetadata)
+    : Object.values(objectValue(packMetadata));
+  const packed = objectValue(entries[0]);
+  const version = stringValue(packed["version"]);
+  assert.equal(stringValue(packed["name"]), "personalitygen");
+  assert.equal(version, stringValue(packageMetadata["version"]));
 
-  const paths = new Set(packed.files.map(({ path }) => path));
+  const paths = new Set(
+    arrayValue(packed["files"]).map((file) => stringValue(objectValue(file)["path"])),
+  );
   for (const required of [
     "LICENSE",
     "README.md",
@@ -64,7 +70,7 @@ try {
     "package contains an unusable declaration map",
   );
 
-  const packagePath = join(packDestination, packed.filename);
+  const packagePath = join(packDestination, stringValue(packed["filename"]));
   const consumerDirectory = join(temporaryDirectory, "consumer");
   mkdirSync(consumerDirectory);
   writeFileSync(
@@ -76,37 +82,21 @@ try {
     stdio: "pipe",
   });
   writeFileSync(
-    join(consumerDirectory, "check.mjs"),
-    `
-      import { AdaptiveBifurcatedProfile, BigFivePersonality, LifeStage } from "personalitygen";
-      const personality = BigFivePersonality.random(LifeStage.Adult);
-      const profile = AdaptiveBifurcatedProfile.fromBigFive(personality.traits);
-      if (profile.vector.length !== 5) process.exit(1);
-    `,
-  );
-  execFileSync("node", ["check.mjs"], {
-    cwd: consumerDirectory,
-    stdio: "pipe",
-  });
-  writeFileSync(
     join(consumerDirectory, "check.ts"),
-    `
-      import { AdaptiveBifurcatedProfile, BigFivePersonality, LifeStage } from "personalitygen";
-      const personality = BigFivePersonality.random(LifeStage.Adult);
-      AdaptiveBifurcatedProfile.fromBigFive(personality.traits);
-    `,
+    readFileSync(new URL("../tests/compat/consumer.ts", import.meta.url), "utf8"),
   );
   writeFileSync(
     join(consumerDirectory, "tsconfig.json"),
     JSON.stringify({
+      extends: join(packageRoot, "tsconfig.json"),
       compilerOptions: {
-        target: "ES2022",
-        module: "NodeNext",
-        moduleResolution: "NodeNext",
-        lib: ["ES2022"],
-        types: [],
-        strict: true,
-        noEmit: true,
+        rootDir: ".",
+        outDir: "build",
+        noEmit: false,
+        declaration: false,
+        declarationMap: false,
+        sourceMap: false,
+        inlineSources: false,
       },
       include: ["check.ts"],
     }),
@@ -120,21 +110,16 @@ try {
     },
   );
 
-  writeFileSync(
-    join(consumerDirectory, "browser-entry.js"),
-    `
-      import { AdaptiveBifurcatedProfile } from "personalitygen";
-      const profile = AdaptiveBifurcatedProfile.random({
-        rng: { uniform: (minimum, maximum) => minimum + (maximum - minimum) / 2 },
-      });
-      if (profile.vector.length !== 5) throw new Error("unexpected vector length");
-    `,
-  );
+  execFileSync("node", ["build/check.js"], {
+    cwd: consumerDirectory,
+    stdio: "pipe",
+  });
+
   const browserBundle = join(consumerDirectory, "browser-bundle.mjs");
   execFileSync(
     join(packageRoot, "node_modules", ".bin", "esbuild"),
     [
-      "browser-entry.js",
+      "build/check.js",
       "--bundle",
       "--platform=browser",
       "--format=esm",
@@ -148,24 +133,28 @@ try {
   execFileSync("node", [browserBundle], { stdio: "pipe" });
 
   const installedPackageRoot = join(consumerDirectory, "node_modules/personalitygen");
-  const installed = JSON.parse(
-    readFileSync(join(installedPackageRoot, "package.json"), "utf8"),
+  const installed = objectValue(
+    parseJson(readFileSync(join(installedPackageRoot, "package.json"), "utf8")),
   );
-  assert.equal(installed.dependencies, undefined);
-  const sourceMap = JSON.parse(
-    readFileSync(join(installedPackageRoot, "dist/index.js.map"), "utf8"),
+  assert.equal(installed["dependencies"], undefined);
+  const sourceMap = objectValue(
+    parseJson(readFileSync(join(installedPackageRoot, "dist/index.js.map"), "utf8")),
   );
-  assert.ok(
-    Array.isArray(sourceMap.sourcesContent) &&
-      sourceMap.sourcesContent.length === sourceMap.sources.length &&
-      sourceMap.sourcesContent.every((source) => typeof source === "string"),
+  const sources = arrayValue(sourceMap["sources"]);
+  const sourcesContent = arrayValue(sourceMap["sourcesContent"]);
+  assert.equal(
+    sourcesContent.length,
+    sources.length,
     "JavaScript source map does not embed its TypeScript sources",
   );
+  for (const source of sourcesContent) {
+    stringValue(source);
+  }
 
   process.stdout.write(
     `${JSON.stringify({
       package: packagePath,
-      version: packed.version,
+      version,
     })}\n`,
   );
 } finally {

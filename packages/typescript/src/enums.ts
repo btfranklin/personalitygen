@@ -1,7 +1,7 @@
-function stringValues<const T extends Readonly<Record<string, string>>>(
-  values: T,
-): readonly T[keyof T][] {
-  return Object.values(values) as T[keyof T][];
+function stringValues<T extends string>(
+  values: Readonly<Record<string, T>>,
+): readonly T[] {
+  return Object.values(values);
 }
 
 function isStringValue<const T extends Readonly<Record<string, string>>>(
@@ -9,7 +9,7 @@ function isStringValue<const T extends Readonly<Record<string, string>>>(
   value: unknown,
 ): value is T[keyof T] {
   return (
-    typeof value === "string" && stringValues(values).includes(value as T[keyof T])
+    typeof value === "string" && stringValues(values).some((item) => item === value)
   );
 }
 

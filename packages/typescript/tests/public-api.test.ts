@@ -68,7 +68,10 @@ test("random generation accepts an inclusive upper endpoint", () => {
 });
 
 test("malformed categorical and numeric inputs use idiomatic errors", () => {
-  assert.throws(() => BigFivePersonality.random("elder" as never), TypeError);
+  assert.throws(() => {
+    // @ts-expect-error Test an invalid input from JavaScript.
+    BigFivePersonality.random("elder");
+  }, TypeError);
   assert.throws(
     () =>
       new BigFiveOpenness({
@@ -83,7 +86,8 @@ test("malformed categorical and numeric inputs use idiomatic errors", () => {
       new AdaptiveBifurcatedAxis({
         domain: AdaptiveBifurcatedDomain.Order,
         positivePole: AdaptiveBifurcatedPole.Strategizing,
-        negativePole: "unsupported" as never,
+        // @ts-expect-error Test an invalid input from JavaScript.
+        negativePole: "unsupported",
         score: 0.5,
       }),
     TypeError,

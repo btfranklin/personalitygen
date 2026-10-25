@@ -7,7 +7,7 @@ import {
   LifeStage,
   PriorityLevel,
   type RandomSource,
-} from "../../dist/index.js";
+} from "personalitygen";
 
 const rng: RandomSource = {
   uniform(minimum, maximum) {
@@ -26,4 +26,7 @@ const personality = BigFivePersonality.random(lifeStage, { rng });
 const adaptive = AdaptiveBifurcatedProfile.fromBigFive(personality.traits);
 
 adaptive.dominantPoles(0.25);
+if (adaptive.vector.length !== 5) {
+  throw new Error("Unexpected vector length.");
+}
 void [domain, pole, style, priority];

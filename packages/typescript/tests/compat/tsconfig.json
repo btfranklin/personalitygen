@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
-    "types": [],
-    "strict": true,
-    "exactOptionalPropertyTypes": true,
-    "noEmit": true
+    "rootDir": ".",
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "inlineSources": false
   },
-  "include": ["consumer.ts"]
+  "include": ["consumer.ts"],
+  "extends": "../../tsconfig.json"
 }

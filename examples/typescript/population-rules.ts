@@ -51,25 +51,40 @@ export function summarizePopulation(
   if (population.length === 0) {
     throw new RangeError("Cannot summarize an empty population.");
   }
-  const traits = [
-    "openness",
-    "conscientiousness",
-    "extraversion",
-    "agreeableness",
-    "neuroticism",
-  ] as const;
-  const means = Object.fromEntries(
-    traits.map((trait) => [
-      trait,
+  const means = {
+    openness:
       population.reduce(
-        (sum, member) => sum + member.personality.traits[trait].score,
+        (sum, member) => sum + member.personality.traits.openness.score,
         0,
       ) / population.length,
-    ]),
-  ) as PopulationSummary["means"];
-  const styleCounts = Object.fromEntries(
-    Object.values(BigFiveConflictResolutionStyle).map((style) => [style, 0]),
-  ) as Record<ConflictStyle, number>;
+    conscientiousness:
+      population.reduce(
+        (sum, member) => sum + member.personality.traits.conscientiousness.score,
+        0,
+      ) / population.length,
+    extraversion:
+      population.reduce(
+        (sum, member) => sum + member.personality.traits.extraversion.score,
+        0,
+      ) / population.length,
+    agreeableness:
+      population.reduce(
+        (sum, member) => sum + member.personality.traits.agreeableness.score,
+        0,
+      ) / population.length,
+    neuroticism:
+      population.reduce(
+        (sum, member) => sum + member.personality.traits.neuroticism.score,
+        0,
+      ) / population.length,
+  };
+  const styleCounts: Record<ConflictStyle, number> = {
+    [BigFiveConflictResolutionStyle.Avoiding]: 0,
+    [BigFiveConflictResolutionStyle.Obliging]: 0,
+    [BigFiveConflictResolutionStyle.Integrating]: 0,
+    [BigFiveConflictResolutionStyle.Dominating]: 0,
+    [BigFiveConflictResolutionStyle.Compromising]: 0,
+  };
   for (const member of population) {
     styleCounts[member.personality.conflictResolution.style] += 1;
   }

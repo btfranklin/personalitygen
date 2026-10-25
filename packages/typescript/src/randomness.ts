@@ -32,7 +32,11 @@ function normalCdf(value: number, mean: number, standardDeviation: number): numb
   const index = Math.floor((magnitude + 1) / 2);
   const center = 2 * index;
   const offset = magnitude - center;
-  let even = NORMAL_TAIL_RATIOS[index] as number;
+  const ratio = NORMAL_TAIL_RATIOS[index];
+  if (ratio === undefined) {
+    throw new RangeError("Normal tail index is outside the table.");
+  }
+  let even: number = ratio;
   let odd = center * even - 1;
   let power = 1;
   let previous = even;

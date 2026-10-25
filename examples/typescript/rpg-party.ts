@@ -35,7 +35,11 @@ const party = [
     wounded: false,
   },
 ] as const satisfies readonly PartyMember[];
-const proposal = preferredPlan(party[0]);
+const leader = party.at(0);
+if (leader === undefined) {
+  throw new Error("The party requires a leader.");
+}
+const proposal = preferredPlan(leader);
 console.log("Scene: The party reaches ruins before nightfall. Bram is wounded.");
 console.log(`Leader's proposal: ${proposal}.`);
 const responses = party.map((member) => {

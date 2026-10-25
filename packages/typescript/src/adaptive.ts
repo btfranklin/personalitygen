@@ -122,7 +122,9 @@ export const ABBF_PROJECTION_COEFFICIENTS = Object.freeze({
     agreeableness: 0.3,
     extraversion: -0.2,
   }),
-});
+} satisfies Readonly<
+  Record<Domain, Readonly<Partial<Record<keyof BigFiveTraits, number>>>>
+>);
 
 export interface AdaptiveBifurcatedProfileOptions {
   readonly orderScore: number;
@@ -176,20 +178,26 @@ export class AdaptiveBifurcatedProfile {
   }
 
   static fromBigFive(traits: BigFiveTraits): AdaptiveBifurcatedProfile {
-    const scores = {
+    const scores: Readonly<Record<string, number>> = {
       openness: unitToSigned(traits.openness.score),
       conscientiousness: unitToSigned(traits.conscientiousness.score),
       extraversion: unitToSigned(traits.extraversion.score),
       agreeableness: unitToSigned(traits.agreeableness.score),
       neuroticism: unitToSigned(traits.neuroticism.score),
     };
-    const project = (domain: Domain): number =>
-      weightedSignedAverage(
-        ...Object.entries(ABBF_PROJECTION_COEFFICIENTS[domain]).map(
-          ([name, coefficient]) =>
-            [scores[name as keyof typeof scores], coefficient] as const,
-        ),
-      );
+    const project = (domain: Domain): number => {
+      const weightedValues: (readonly [number, number])[] = [];
+      for (const [name, coefficient] of Object.entries(
+        ABBF_PROJECTION_COEFFICIENTS[domain],
+      )) {
+        const score = scores[name];
+        if (score === undefined) {
+          throw new TypeError(`Unsupported Big Five trait: ${name}`);
+        }
+        weightedValues.push([score, coefficient]);
+      }
+      return weightedSignedAverage(...weightedValues);
+    };
 
     return new AdaptiveBifurcatedProfile({
       orderScore: project(AdaptiveBifurcatedDomain.Order),

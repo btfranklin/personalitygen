@@ -19,11 +19,12 @@ const cast = castMystery(candidates);
 console.log("Mystery cast from 40 simulated adult profiles:");
 console.log("Roles are story rules. Similarity is not conflict probability.");
 console.log("The rival role does not mean the character is a villain.");
-for (const [role, candidate] of Object.entries({
-  protagonist: cast.protagonist,
-  ally: cast.ally,
-  rival: cast.rival,
-})) {
+const roles = [
+  ["protagonist", cast.protagonist],
+  ["ally", cast.ally],
+  ["rival", cast.rival],
+] as const;
+for (const [role, candidate] of roles) {
   console.log(
     `${role}: ${candidate.id}; dominant poles=${JSON.stringify(candidate.profile.dominantPoles(0.1))}`,
   );

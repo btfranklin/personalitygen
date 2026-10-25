@@ -21,15 +21,25 @@ const cast = {
   Cato: profile([0.2, 0.1, -0.2, -0.7, 0.8]),
   Dima: profile([-0.6, 0.6, 0.5, 0.7, 0.1]),
 };
+const candidates = [
+  ["Asha", cast.Asha],
+  ["Bram", cast.Bram],
+  ["Cato", cast.Cato],
+  ["Dima", cast.Dima],
+] as const;
 
 function selectByPole(
   domain: AdaptiveBifurcatedDomain,
   pole: AdaptiveBifurcatedPole,
   threshold = 0.4,
 ): string[] {
-  return Object.entries(cast)
-    .filter(([, candidate]) => candidate.dominantPoles(threshold)[domain] === pole)
-    .map(([name]) => name);
+  const selected: string[] = [];
+  for (const [name, candidate] of candidates) {
+    if (candidate.dominantPoles(threshold)[domain] === pole) {
+      selected.push(name);
+    }
+  }
+  return selected;
 }
 
 console.log(

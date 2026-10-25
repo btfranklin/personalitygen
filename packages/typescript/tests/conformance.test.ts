@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { test } from "node:test";
 import { ABBF_PROJECTION_COEFFICIENTS, AXIS_DEFINITIONS } from "../dist/adaptive.js";
 import {
@@ -38,65 +38,12 @@ import {
 import { randomGaussian } from "../dist/randomness.js";
 import { componentAverageScore } from "../dist/scoring.js";
 import { TRAIT_SAMPLING_CONFIGURATIONS } from "../dist/traits.js";
-
-interface Model {
-  readonly schemaVersion: number;
-  readonly tolerances: {
-    readonly arithmetic: number;
-    readonly gaussian: number;
-  };
-  readonly ranges: {
-    readonly unit: readonly number[];
-    readonly traitSample: readonly number[];
-    readonly signed: readonly number[];
-  };
-  readonly randomness: {
-    readonly cdfEpsilon: number;
-    readonly abbfStandardDeviation: number;
-  };
-  readonly lifeStages: readonly string[];
-  readonly priorityLevels: readonly string[];
-  readonly traits: Readonly<
-    Record<
-      string,
-      {
-        readonly components: readonly string[];
-        readonly standardDeviation: number;
-        readonly means: Readonly<Record<string, readonly number[]>>;
-      }
-    >
-  >;
-  readonly conflictResolution: {
-    readonly minimumWeight: number;
-    readonly styles: Readonly<
-      Record<
-        string,
-        {
-          readonly coefficients: Readonly<Record<string, number>>;
-          readonly concerns: readonly string[];
-        }
-      >
-    >;
-  };
-  readonly adaptive: {
-    readonly axes: readonly {
-      readonly domain: string;
-      readonly positivePole: string;
-      readonly negativePole: string;
-    }[];
-    readonly projection: Readonly<Record<string, Readonly<Record<string, number>>>>;
-  };
-}
+import { Fixture, loadFixture } from "./fixture-data.js";
 
 const specRoot = new URL("../../../spec/", import.meta.url);
-
-function loadJson<T>(path: string): T {
-  return JSON.parse(readFileSync(new URL(path, specRoot), "utf8")) as T;
-}
-
-const model = loadJson<Model>("model.json");
-const arithmeticTolerance = model.tolerances.arithmetic;
-const gaussianTolerance = model.tolerances.gaussian;
+const model = loadFixture(new URL("model.json", specRoot));
+const arithmeticTolerance = model.mapping("tolerances").number("arithmetic");
+const gaussianTolerance = model.mapping("tolerances").number("gaussian");
 const CONFORMANCE_FIXTURES = Object.freeze({
   adaptive: "adaptive.json",
   aggregateScoring: "aggregate-scoring.json",
@@ -105,33 +52,50 @@ const CONFORMANCE_FIXTURES = Object.freeze({
   lifeStageSampling: "life-stage-sampling.json",
   validation: "validation.json",
 });
-const TRAIT_COMPONENT_PROPERTIES = Object.freeze({
-  openness: Object.freeze({
-    aesthetic_sensitivity: "aestheticSensitivityScore",
-    creative_imagination: "creativeImaginationScore",
-    intellectual_curiosity: "intellectualCuriosityScore",
-  }),
-  conscientiousness: Object.freeze({
-    organization: "organizationScore",
-    responsibility: "responsibilityScore",
-    productivity: "productivityScore",
-  }),
-  extraversion: Object.freeze({
-    assertiveness: "assertivenessScore",
-    sociability: "sociabilityScore",
-    energy_level: "energyLevelScore",
-  }),
-  agreeableness: Object.freeze({
-    compassion: "compassionScore",
-    respectfulness: "respectfulnessScore",
-    trust: "trustScore",
-  }),
-  neuroticism: Object.freeze({
-    anxiety: "anxietyScore",
-    emotional_volatility: "emotionalVolatilityScore",
-    depression: "depressionScore",
-  }),
-});
+
+function traitComponents(traits: BigFiveTraits) {
+  return {
+    openness: {
+      aesthetic_sensitivity: traits.openness.aestheticSensitivityScore,
+      creative_imagination: traits.openness.creativeImaginationScore,
+      intellectual_curiosity: traits.openness.intellectualCuriosityScore,
+    },
+    conscientiousness: {
+      organization: traits.conscientiousness.organizationScore,
+      responsibility: traits.conscientiousness.responsibilityScore,
+      productivity: traits.conscientiousness.productivityScore,
+    },
+    extraversion: {
+      assertiveness: traits.extraversion.assertivenessScore,
+      sociability: traits.extraversion.sociabilityScore,
+      energy_level: traits.extraversion.energyLevelScore,
+    },
+    agreeableness: {
+      compassion: traits.agreeableness.compassionScore,
+      respectfulness: traits.agreeableness.respectfulnessScore,
+      trust: traits.agreeableness.trustScore,
+    },
+    neuroticism: {
+      anxiety: traits.neuroticism.anxietyScore,
+      emotional_volatility: traits.neuroticism.emotionalVolatilityScore,
+      depression: traits.neuroticism.depressionScore,
+    },
+  };
+}
+
+function lifeStage(fixture: Fixture): LifeStage {
+  const stage = fixture.string("lifeStage");
+  for (const allowed of LIFE_STAGES) {
+    if (stage === allowed) {
+      return allowed;
+    }
+  }
+  throw new TypeError(`Unknown life stage: ${stage}`);
+}
+
+function fixtureFile(name: string): Fixture {
+  return loadFixture(new URL(`conformance/${name}`, specRoot));
+}
 
 function assertClose(actual: number, expected: number, tolerance: number): void {
   assert.ok(
@@ -147,9 +111,9 @@ function fractionSource(
   return {
     uniform(minimum, maximum) {
       const fraction = fractions[index];
-      assert.notEqual(fraction, undefined, "random fixture was exhausted");
+      assert.ok(fraction !== undefined, "random fixture was exhausted");
       index += 1;
-      return minimum + (maximum - minimum) * (fraction as number);
+      return minimum + (maximum - minimum) * fraction;
     },
     assertConsumed() {
       assert.equal(index, fractions.length, "random fixture has unused draws");
@@ -157,104 +121,87 @@ function fractionSource(
   };
 }
 
-function bigFiveTraits(
-  scores: Readonly<{
-    openness: number;
-    conscientiousness: number;
-    extraversion: number;
-    agreeableness: number;
-    neuroticism: number;
-  }>,
-): BigFiveTraits {
+function bigFiveTraits(scores: Fixture): BigFiveTraits {
   return new BigFiveTraits({
     openness: new BigFiveOpenness({
-      aestheticSensitivityScore: scores.openness,
-      creativeImaginationScore: scores.openness,
-      intellectualCuriosityScore: scores.openness,
+      aestheticSensitivityScore: scores.number("openness"),
+      creativeImaginationScore: scores.number("openness"),
+      intellectualCuriosityScore: scores.number("openness"),
     }),
     conscientiousness: new BigFiveConscientiousness({
-      organizationScore: scores.conscientiousness,
-      responsibilityScore: scores.conscientiousness,
-      productivityScore: scores.conscientiousness,
+      organizationScore: scores.number("conscientiousness"),
+      responsibilityScore: scores.number("conscientiousness"),
+      productivityScore: scores.number("conscientiousness"),
     }),
     extraversion: new BigFiveExtraversion({
-      assertivenessScore: scores.extraversion,
-      sociabilityScore: scores.extraversion,
-      energyLevelScore: scores.extraversion,
+      assertivenessScore: scores.number("extraversion"),
+      sociabilityScore: scores.number("extraversion"),
+      energyLevelScore: scores.number("extraversion"),
     }),
     agreeableness: new BigFiveAgreeableness({
-      compassionScore: scores.agreeableness,
-      respectfulnessScore: scores.agreeableness,
-      trustScore: scores.agreeableness,
+      compassionScore: scores.number("agreeableness"),
+      respectfulnessScore: scores.number("agreeableness"),
+      trustScore: scores.number("agreeableness"),
     }),
     neuroticism: new BigFiveNeuroticism({
-      anxietyScore: scores.neuroticism,
-      emotionalVolatilityScore: scores.neuroticism,
-      depressionScore: scores.neuroticism,
+      anxietyScore: scores.number("neuroticism"),
+      emotionalVolatilityScore: scores.number("neuroticism"),
+      depressionScore: scores.number("neuroticism"),
     }),
   });
 }
 
 function profile(vector: readonly number[]): AdaptiveBifurcatedProfile {
+  assert.equal(vector.length, 5);
+  const [orderScore, chaosScore, cooperationScore, conflictScore, competitionScore] =
+    vector;
+  assert.ok(orderScore !== undefined);
+  assert.ok(chaosScore !== undefined);
+  assert.ok(cooperationScore !== undefined);
+  assert.ok(conflictScore !== undefined);
+  assert.ok(competitionScore !== undefined);
   return new AdaptiveBifurcatedProfile({
-    orderScore: vector[0] as number,
-    chaosScore: vector[1] as number,
-    cooperationScore: vector[2] as number,
-    conflictScore: vector[3] as number,
-    competitionScore: vector[4] as number,
+    orderScore,
+    chaosScore,
+    cooperationScore,
+    conflictScore,
+    competitionScore,
   });
 }
 
-interface LifeStageSamplingCase {
-  readonly lifeStage: LifeStage;
-  readonly uniformFractions: readonly number[];
-  readonly expected: Readonly<Record<string, readonly number[]>>;
-}
-
-interface PersonalitySamplingCase extends LifeStageSamplingCase {
-  readonly expectedConflictResolution: {
-    readonly style: string;
-    readonly concernForSelf: string;
-    readonly concernForOthers: string;
-  };
-}
-
-function assertTraitComponents(
-  traits: BigFiveTraits,
-  expected: Readonly<Record<string, readonly number[]>>,
-): void {
-  for (const [traitName, componentProperties] of Object.entries(
-    TRAIT_COMPONENT_PROPERTIES,
-  )) {
-    const trait = traits[
-      traitName as keyof typeof TRAIT_COMPONENT_PROPERTIES
-    ] as unknown as Readonly<Record<string, number>>;
-    const values = expected[traitName] as readonly number[];
-    Object.values(componentProperties).forEach((propertyName, index) => {
-      const actual = trait[propertyName];
+function assertTraitComponents(traits: BigFiveTraits, expected: Fixture): void {
+  const components = traitComponents(traits);
+  assert.deepEqual(expected.keys(), Object.keys(components));
+  for (const [traitName, properties] of Object.entries(components)) {
+    const values = expected.numbers(traitName);
+    assert.equal(values.length, Object.keys(properties).length);
+    Object.entries(properties).forEach(([propertyName, actual], index) => {
       assert.equal(
         typeof actual,
         "number",
         `${traitName}.${propertyName} is not a numeric public property`,
       );
-      assertClose(actual as number, values[index] as number, gaussianTolerance);
+      const value = values[index];
+      assert.ok(value !== undefined);
+      assertClose(actual, value, gaussianTolerance);
     });
   }
 }
 
 test("implementation constants match the language-neutral model", () => {
-  assert.equal(model.schemaVersion, 1);
-  assert.deepEqual([UNIT_RANGE_MIN, UNIT_RANGE_MAX], model.ranges.unit);
-  assert.deepEqual([TRAIT_SAMPLE_MIN, UNIT_RANGE_MAX], model.ranges.traitSample);
-  assert.deepEqual([SIGNED_RANGE_MIN, SIGNED_RANGE_MAX], model.ranges.signed);
-  assert.equal(CDF_EPSILON, model.randomness.cdfEpsilon);
-  assert.equal(ABBF_STANDARD_DEVIATION, model.randomness.abbfStandardDeviation);
-  assert.deepEqual(LIFE_STAGES, model.lifeStages);
-  assert.deepEqual(PRIORITY_LEVELS, model.priorityLevels);
-  assert.deepEqual(
-    CONFLICT_RESOLUTION_STYLES,
-    Object.keys(model.conflictResolution.styles),
-  );
+  assert.equal(model.number("schemaVersion"), 1);
+  const ranges = model.mapping("ranges");
+  assert.deepEqual([UNIT_RANGE_MIN, UNIT_RANGE_MAX], ranges.numbers("unit"));
+  assert.deepEqual([TRAIT_SAMPLE_MIN, UNIT_RANGE_MAX], ranges.numbers("traitSample"));
+  assert.deepEqual([SIGNED_RANGE_MIN, SIGNED_RANGE_MAX], ranges.numbers("signed"));
+  const randomness = model.mapping("randomness");
+  assert.equal(CDF_EPSILON, randomness.number("cdfEpsilon"));
+  assert.equal(ABBF_STANDARD_DEVIATION, randomness.number("abbfStandardDeviation"));
+  assert.deepEqual(LIFE_STAGES, model.strings("lifeStages"));
+  assert.deepEqual(PRIORITY_LEVELS, model.strings("priorityLevels"));
+  const conflict = model.mapping("conflictResolution");
+  const styles = conflict.mapping("styles");
+  assert.deepEqual(CONFLICT_RESOLUTION_STYLES, styles.keys());
   assert.deepEqual(Object.keys(TRAIT_SAMPLING_CONFIGURATIONS), [
     "openness",
     "conscientiousness",
@@ -262,38 +209,67 @@ test("implementation constants match the language-neutral model", () => {
     "agreeableness",
     "neuroticism",
   ]);
-  for (const [name, expected] of Object.entries(model.traits)) {
-    const actual =
-      TRAIT_SAMPLING_CONFIGURATIONS[name as keyof typeof TRAIT_SAMPLING_CONFIGURATIONS];
-    assert.equal(actual.standardDeviation, expected.standardDeviation);
-    assert.deepEqual(actual.means, expected.means);
+  const modelTraits = model.mapping("traits");
+  assert.deepEqual(modelTraits.keys(), Object.keys(TRAIT_SAMPLING_CONFIGURATIONS));
+  const components = traitComponents(
+    bigFiveTraits(
+      new Fixture({
+        openness: 0.5,
+        conscientiousness: 0.5,
+        extraversion: 0.5,
+        agreeableness: 0.5,
+        neuroticism: 0.5,
+      }),
+    ),
+  );
+  for (const [name, actual] of Object.entries(TRAIT_SAMPLING_CONFIGURATIONS)) {
+    const expected = modelTraits.mapping(name);
+    assert.equal(actual.standardDeviation, expected.number("standardDeviation"));
+    const means = expected.mapping("means");
+    assert.deepEqual(Object.keys(actual.means), means.keys());
+    for (const [stage, actualMeans] of Object.entries(actual.means)) {
+      assert.deepEqual(actualMeans, means.numbers(stage));
+    }
+  }
+  for (const [name, properties] of Object.entries(components)) {
     assert.deepEqual(
-      Object.keys(
-        TRAIT_COMPONENT_PROPERTIES[name as keyof typeof TRAIT_COMPONENT_PROPERTIES],
-      ),
-      expected.components,
+      Object.keys(properties),
+      modelTraits.mapping(name).strings("components"),
     );
   }
-  assert.equal(CONFLICT_MINIMUM_WEIGHT, model.conflictResolution.minimumWeight);
-  for (const [style, expected] of Object.entries(model.conflictResolution.styles)) {
+  assert.equal(CONFLICT_MINIMUM_WEIGHT, conflict.number("minimumWeight"));
+  for (const [style, coefficients] of Object.entries(CONFLICT_STYLE_COEFFICIENTS)) {
     assert.deepEqual(
-      CONFLICT_STYLE_COEFFICIENTS[style as keyof typeof CONFLICT_STYLE_COEFFICIENTS],
-      expected.coefficients,
-    );
-    assert.deepEqual(
-      CONFLICT_CONCERN_MAPPINGS[style as keyof typeof CONFLICT_CONCERN_MAPPINGS],
-      expected.concerns,
+      coefficients,
+      styles.mapping(style).mapping("coefficients").numberValues(),
     );
   }
+  assert.deepEqual(Object.keys(CONFLICT_STYLE_COEFFICIENTS), styles.keys());
+  for (const [style, concerns] of Object.entries(CONFLICT_CONCERN_MAPPINGS)) {
+    assert.deepEqual(concerns, styles.mapping(style).strings("concerns"));
+  }
+  assert.deepEqual(Object.keys(CONFLICT_CONCERN_MAPPINGS), styles.keys());
+  const adaptive = model.mapping("adaptive");
   assert.deepEqual(
     AXIS_DEFINITIONS.map(({ domain, positivePole, negativePole }) => ({
       domain,
       positivePole,
       negativePole,
     })),
-    model.adaptive.axes,
+    adaptive.objects("axes").map((axis) => {
+      assert.deepEqual(axis.keys(), ["domain", "positivePole", "negativePole"]);
+      return {
+        domain: axis.string("domain"),
+        positivePole: axis.string("positivePole"),
+        negativePole: axis.string("negativePole"),
+      };
+    }),
   );
-  assert.deepEqual(ABBF_PROJECTION_COEFFICIENTS, model.adaptive.projection);
+  const projection = adaptive.mapping("projection");
+  assert.deepEqual(Object.keys(ABBF_PROJECTION_COEFFICIENTS), projection.keys());
+  for (const [domain, coefficients] of Object.entries(ABBF_PROJECTION_COEFFICIENTS)) {
+    assert.deepEqual(coefficients, projection.mapping(domain).numberValues());
+  }
 });
 
 test("conformance fixture set is explicit", () => {
@@ -304,45 +280,19 @@ test("conformance fixture set is explicit", () => {
 });
 
 test("aggregate scoring fixtures", () => {
-  const fixtures = loadJson<{
-    readonly cases: readonly {
-      readonly components: readonly number[];
-      readonly expected: number;
-    }[];
-  }>(`conformance/${CONFORMANCE_FIXTURES.aggregateScoring}`);
-  for (const fixture of fixtures.cases) {
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.aggregateScoring);
+  for (const fixture of fixtures.objects("cases")) {
     assertClose(
-      componentAverageScore(...fixture.components),
-      fixture.expected,
+      componentAverageScore(...fixture.numbers("components")),
+      fixture.number("expected"),
       arithmeticTolerance,
     );
   }
 });
 
 test("validation fixtures", () => {
-  const fixtures = loadJson<{
-    readonly unitScores: {
-      readonly valid: readonly number[];
-      readonly invalid: readonly number[];
-    };
-    readonly signedScores: {
-      readonly valid: readonly number[];
-      readonly invalid: readonly number[];
-    };
-    readonly dominantPoleThresholds: {
-      readonly valid: readonly number[];
-      readonly invalid: readonly number[];
-    };
-    readonly gaussianParameters: {
-      readonly invalid: readonly {
-        readonly mean: number;
-        readonly standardDeviation: number;
-        readonly minimum: number;
-        readonly maximum: number;
-      }[];
-    };
-  }>(`conformance/${CONFORMANCE_FIXTURES.validation}`);
-  for (const score of fixtures.unitScores.valid) {
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.validation);
+  for (const score of fixtures.mapping("unitScores").numbers("valid")) {
     assert.doesNotThrow(
       () =>
         new BigFiveOpenness({
@@ -352,7 +302,7 @@ test("validation fixtures", () => {
         }),
     );
   }
-  for (const score of fixtures.unitScores.invalid) {
+  for (const score of fixtures.mapping("unitScores").numbers("invalid")) {
     assert.throws(
       () =>
         new BigFiveOpenness({
@@ -363,24 +313,29 @@ test("validation fixtures", () => {
       RangeError,
     );
   }
-  for (const score of fixtures.signedScores.valid) {
+  for (const score of fixtures.mapping("signedScores").numbers("valid")) {
     assert.doesNotThrow(() => profile([score, 0, 0, 0, 0]));
   }
-  for (const score of fixtures.signedScores.invalid) {
+  for (const score of fixtures.mapping("signedScores").numbers("invalid")) {
     assert.throws(() => profile([score, 0, 0, 0, 0]), RangeError);
   }
   const neutral = profile([0, 0, 0, 0, 0]);
-  for (const threshold of fixtures.dominantPoleThresholds.valid) {
+  for (const threshold of fixtures.mapping("dominantPoleThresholds").numbers("valid")) {
     assert.doesNotThrow(() => neutral.dominantPoles(threshold));
   }
-  for (const threshold of fixtures.dominantPoleThresholds.invalid) {
+  for (const threshold of fixtures
+    .mapping("dominantPoleThresholds")
+    .numbers("invalid")) {
     assert.throws(() => neutral.dominantPoles(threshold), RangeError);
   }
-  for (const parameters of fixtures.gaussianParameters.invalid) {
+  for (const parameters of fixtures.mapping("gaussianParameters").objects("invalid")) {
     assert.throws(
       () =>
         randomGaussian({
-          ...parameters,
+          mean: parameters.number("mean"),
+          standardDeviation: parameters.number("standardDeviation"),
+          minimum: parameters.number("minimum"),
+          maximum: parameters.number("maximum"),
           rng: fractionSource([0.5]),
         }),
       RangeError,
@@ -389,146 +344,102 @@ test("validation fixtures", () => {
 });
 
 test("truncated Gaussian fixtures", () => {
-  const fixtures = loadJson<{
-    readonly cases: readonly {
-      readonly mean: number;
-      readonly standardDeviation: number;
-      readonly minimum: number;
-      readonly maximum: number;
-      readonly uniformFraction: number;
-      readonly expected: number;
-    }[];
-  }>(`conformance/${CONFORMANCE_FIXTURES.gaussianSampling}`);
-  for (const fixture of fixtures.cases) {
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.gaussianSampling);
+  for (const fixture of fixtures.objects("cases")) {
     assertClose(
       randomGaussian({
-        mean: fixture.mean,
-        standardDeviation: fixture.standardDeviation,
-        minimum: fixture.minimum,
-        maximum: fixture.maximum,
-        rng: fractionSource([fixture.uniformFraction]),
+        mean: fixture.number("mean"),
+        standardDeviation: fixture.number("standardDeviation"),
+        minimum: fixture.number("minimum"),
+        maximum: fixture.number("maximum"),
+        rng: fractionSource([fixture.number("uniformFraction")]),
       }),
-      fixture.expected,
+      fixture.number("expected"),
       gaussianTolerance,
     );
   }
 });
 
 test("life-stage generation fixtures", () => {
-  const fixtures = loadJson<{
-    readonly cases: readonly LifeStageSamplingCase[];
-  }>(`conformance/${CONFORMANCE_FIXTURES.lifeStageSampling}`);
-  for (const fixture of fixtures.cases) {
-    const rng = fractionSource(fixture.uniformFractions);
-    const traits = BigFiveTraits.random(fixture.lifeStage, { rng });
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.lifeStageSampling);
+  for (const fixture of fixtures.objects("cases")) {
+    const rng = fractionSource(fixture.numbers("uniformFractions"));
+    const traits = BigFiveTraits.random(lifeStage(fixture), { rng });
     rng.assertConsumed();
-    assertTraitComponents(traits, fixture.expected);
+    assertTraitComponents(traits, fixture.mapping("expected"));
   }
 });
 
 test("full personality generation consumes the shared draw sequence", () => {
-  const fixtures = loadJson<{
-    readonly personalityCases: readonly PersonalitySamplingCase[];
-  }>(`conformance/${CONFORMANCE_FIXTURES.lifeStageSampling}`);
-  for (const fixture of fixtures.personalityCases) {
-    const rng = fractionSource(fixture.uniformFractions);
-    const personality = BigFivePersonality.random(fixture.lifeStage, { rng });
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.lifeStageSampling);
+  for (const fixture of fixtures.objects("personalityCases")) {
+    const rng = fractionSource(fixture.numbers("uniformFractions"));
+    const personality = BigFivePersonality.random(lifeStage(fixture), { rng });
     rng.assertConsumed();
-    assertTraitComponents(personality.traits, fixture.expected);
+    assertTraitComponents(personality.traits, fixture.mapping("expected"));
     assert.deepEqual(
       {
         style: personality.conflictResolution.style,
         concernForSelf: personality.conflictResolution.concernForSelf,
         concernForOthers: personality.conflictResolution.concernForOthers,
       },
-      fixture.expectedConflictResolution,
+      fixture.mapping("expectedConflictResolution").stringValues(),
     );
   }
 });
 
 test("weighted conflict selection fixtures", () => {
-  const fixtures = loadJson<{
-    readonly cases: readonly {
-      readonly traits: Readonly<{
-        openness: number;
-        conscientiousness: number;
-        extraversion: number;
-        agreeableness: number;
-        neuroticism: number;
-      }>;
-      readonly weights: Readonly<Record<string, number>>;
-      readonly selections: readonly {
-        readonly uniformFraction: number;
-        readonly expected: string;
-      }[];
-    }[];
-  }>(`conformance/${CONFORMANCE_FIXTURES.conflictResolution}`);
-  for (const fixture of fixtures.cases) {
-    const traits = bigFiveTraits(fixture.traits);
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.conflictResolution);
+  for (const fixture of fixtures.objects("cases")) {
+    const traits = bigFiveTraits(fixture.mapping("traits"));
     const weights = conflictStyleWeights(traits);
-    for (const [style, expected] of Object.entries(fixture.weights)) {
-      assertClose(
-        weights[style as keyof typeof weights],
-        expected,
-        arithmeticTolerance,
-      );
+    const expectedWeights = fixture.mapping("weights");
+    assert.deepEqual(Object.keys(weights), expectedWeights.keys());
+    for (const [style, weight] of Object.entries(weights)) {
+      assertClose(weight, expectedWeights.number(style), arithmeticTolerance);
     }
-    for (const selection of fixture.selections) {
+    for (const selection of fixture.objects("selections")) {
       assert.equal(
         BigFiveConflictResolution.random(traits, {
-          rng: fractionSource([selection.uniformFraction]),
+          rng: fractionSource([selection.number("uniformFraction")]),
         }).style,
-        selection.expected,
+        selection.string("expected"),
       );
     }
   }
 });
 
 test("ABBF projection, poles, dot products, and cosine fixtures", () => {
-  const fixtures = loadJson<{
-    readonly projectionCases: readonly {
-      readonly bigFive: Readonly<{
-        openness: number;
-        conscientiousness: number;
-        extraversion: number;
-        agreeableness: number;
-        neuroticism: number;
-      }>;
-      readonly expected: readonly number[];
-    }[];
-    readonly dominantPoleCases: readonly {
-      readonly vector: readonly number[];
-      readonly threshold: number;
-      readonly expected: Readonly<Record<string, string>>;
-    }[];
-    readonly vectorCases: readonly {
-      readonly left: readonly number[];
-      readonly right: readonly number[];
-      readonly dotProduct: number;
-      readonly cosineSimilarity: number;
-    }[];
-  }>(`conformance/${CONFORMANCE_FIXTURES.adaptive}`);
-  for (const fixture of fixtures.projectionCases) {
+  const fixtures = fixtureFile(CONFORMANCE_FIXTURES.adaptive);
+  for (const fixture of fixtures.objects("projectionCases")) {
     const actual = AdaptiveBifurcatedProfile.fromBigFive(
-      bigFiveTraits(fixture.bigFive),
+      bigFiveTraits(fixture.mapping("bigFive")),
     ).vector;
+    const expected = fixture.numbers("expected");
+    assert.equal(actual.length, expected.length);
     actual.forEach((value, index) => {
-      assertClose(value, fixture.expected[index] as number, arithmeticTolerance);
+      const expectedValue = expected[index];
+      assert.ok(expectedValue !== undefined);
+      assertClose(value, expectedValue, arithmeticTolerance);
     });
   }
-  for (const fixture of fixtures.dominantPoleCases) {
+  for (const fixture of fixtures.objects("dominantPoleCases")) {
     assert.deepEqual(
-      profile(fixture.vector).dominantPoles(fixture.threshold),
-      fixture.expected,
+      profile(fixture.numbers("vector")).dominantPoles(fixture.number("threshold")),
+      fixture.mapping("expected").stringValues(),
     );
   }
-  for (const fixture of fixtures.vectorCases) {
-    const left = profile(fixture.left);
-    const right = profile(fixture.right);
-    assertClose(left.dotProduct(right), fixture.dotProduct, arithmeticTolerance);
+  for (const fixture of fixtures.objects("vectorCases")) {
+    const left = profile(fixture.numbers("left"));
+    const right = profile(fixture.numbers("right"));
+    assertClose(
+      left.dotProduct(right),
+      fixture.number("dotProduct"),
+      arithmeticTolerance,
+    );
     assertClose(
       left.cosineSimilarity(right),
-      fixture.cosineSimilarity,
+      fixture.number("cosineSimilarity"),
       arithmeticTolerance,
     );
   }

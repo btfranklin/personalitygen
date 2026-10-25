@@ -19,7 +19,13 @@
     "declarationMap": false,
     "sourceMap": true,
     "inlineSources": true,
-    "skipLibCheck": false
+    "skipLibCheck": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false
   },
   "include": ["src/**/*.ts"]
 }

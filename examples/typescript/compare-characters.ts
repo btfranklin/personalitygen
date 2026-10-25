@@ -24,13 +24,23 @@ const cast = {
   }),
 };
 
-const names = Object.keys(cast) as (keyof typeof cast)[];
-for (let leftIndex = 0; leftIndex < names.length; leftIndex += 1) {
-  for (let rightIndex = leftIndex + 1; rightIndex < names.length; rightIndex += 1) {
-    const leftName = names[leftIndex] as keyof typeof cast;
-    const rightName = names[rightIndex] as keyof typeof cast;
-    const left = cast[leftName];
-    const right = cast[rightName];
+const characters = [
+  ["diplomat", cast.diplomat],
+  ["scout", cast.scout],
+  ["warlord", cast.warlord],
+] as const;
+for (let leftIndex = 0; leftIndex < characters.length; leftIndex += 1) {
+  const leftEntry = characters.at(leftIndex);
+  if (leftEntry === undefined) continue;
+  for (
+    let rightIndex = leftIndex + 1;
+    rightIndex < characters.length;
+    rightIndex += 1
+  ) {
+    const rightEntry = characters.at(rightIndex);
+    if (rightEntry === undefined) continue;
+    const [leftName, left] = leftEntry;
+    const [rightName, right] = rightEntry;
     console.log(
       `${leftName} / ${rightName}: dot=${left.dotProduct(right).toFixed(2)}, cosine=${left.cosineSimilarity(right).toFixed(2)}`,
     );

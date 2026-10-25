@@ -117,16 +117,21 @@ export function conflictStyleWeights(
   traits: BigFiveTraits,
 ): Readonly<Record<ConflictStyle, number>> {
   const scores = traitScores(traits);
-  const weights = {} as Record<ConflictStyle, number>;
-  for (const style of CONFLICT_RESOLUTION_STYLES) {
+  const weight = (style: ConflictStyle): number => {
     const coefficients = CONFLICT_STYLE_COEFFICIENTS[style];
     const level = TRAIT_NAMES.reduce(
       (total, traitName) => total + scores[traitName] * coefficients[traitName],
       0,
     );
-    weights[style] = Math.max(level, CONFLICT_MINIMUM_WEIGHT);
-  }
-  return Object.freeze(weights);
+    return Math.max(level, CONFLICT_MINIMUM_WEIGHT);
+  };
+  return Object.freeze({
+    avoiding: weight(BigFiveConflictResolutionStyle.Avoiding),
+    obliging: weight(BigFiveConflictResolutionStyle.Obliging),
+    integrating: weight(BigFiveConflictResolutionStyle.Integrating),
+    dominating: weight(BigFiveConflictResolutionStyle.Dominating),
+    compromising: weight(BigFiveConflictResolutionStyle.Compromising),
+  });
 }
 
 function weightedChoice(
@@ -148,9 +153,7 @@ function weightedChoice(
       return style;
     }
   }
-  return CONFLICT_RESOLUTION_STYLES[
-    CONFLICT_RESOLUTION_STYLES.length - 1
-  ] as ConflictStyle;
+  return BigFiveConflictResolutionStyle.Compromising;
 }
 
 export interface BigFiveTraitsOptions {

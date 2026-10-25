@@ -119,6 +119,29 @@ The fixture reader checks mapping keys and the value types used by each test.
 The package smoke test is a Python file so that mypy can check it before the
 package verifier runs it in an isolated environment.
 
+## TypeScript Type Safety
+
+All TypeScript source, tests, examples, and compatibility consumers use the
+strict settings in `packages/typescript/tsconfig.json`. The `typecheck` command
+also checks the `.mjs` scripts with `allowJs` and `checkJs`. Script parameters
+use JSDoc types. Keep new files in these checks.
+
+The compiler checks indexed access, optional properties, index signatures,
+unused declarations, return paths, and code that cannot run. Biome rejects
+explicit `any`, non-null assertions, and `@ts-ignore`. Its `useLiteralKeys` rule
+is disabled because index signatures require bracket access.
+
+Receive parsed JSON as `unknown`. Check its structure and value types before
+use. Use complete object literals for records with required keys. Check array
+values before use, or use fixed-length tuples. Do not use type assertions to
+bypass these checks. `as const` can preserve literal and tuple types.
+
+Tests for invalid JavaScript inputs can use a local `@ts-expect-error` with a
+reason. This directive must cause an error if the invalid call becomes valid.
+The package verifier copies the checked compatibility consumer, compiles it
+with TypeScript 6 against the installed tarball, and runs the result in Node
+and in a browser-targeted bundle. It does not generate unchecked source code.
+
 ## Test Contracts
 
 Tests should protect the package's public behavior, not only current implementation details. Important contracts include:

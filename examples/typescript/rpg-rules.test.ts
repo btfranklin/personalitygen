@@ -26,7 +26,14 @@ test("opposition uses the saved style; agreement does not cause a dispute", () =
     dominating: "refuse",
     compromising: "offer a limited visit",
   } as const;
-  for (const style of Object.keys(responses) as (keyof typeof responses)[]) {
+  const styles = [
+    "avoiding",
+    "obliging",
+    "integrating",
+    "dominating",
+    "compromising",
+  ] as const;
+  for (const style of styles) {
     const member: PartyMember = {
       name: "Bram",
       personality: new BigFivePersonality({
