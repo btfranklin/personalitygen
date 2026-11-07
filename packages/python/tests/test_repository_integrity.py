@@ -126,3 +126,46 @@ def test_typescript_metadata_matches_repository_policy() -> None:
     assert (typescript_root / "LICENSE").read_text(encoding="utf-8") == (
         REPOSITORY_ROOT / "LICENSE"
     ).read_text(encoding="utf-8")
+
+
+def test_draft_release_requires_both_complete_ci_workflows() -> None:
+    workflows = REPOSITORY_ROOT / ".github" / "workflows"
+    draft = (workflows / "create-draft-release.yml").read_text(encoding="utf-8")
+    assert 'tags:\n            - "v*.*.*"' in draft
+    for language in ("python", "typescript"):
+        assert f"uses: ./.github/workflows/{language}-package.yml" in draft
+        ci = (workflows / f"{language}-package.yml").read_text(encoding="utf-8")
+        assert "    workflow_call:" in ci
+    release_job = draft.split("    draft-release:\n", 1)[1]
+    assert "needs: [python-validation, typescript-validation]" in release_job
+    assert "if:" not in release_job  # Default success gating must stay in force.
+    assert "uses: btfranklin/release-notes-scribe@v0" in release_job
+    assert 'create_release: "true"' in release_job
+    assert 'draft: "true"' in release_job
+
+
+def test_publication_only_builds_and_publishes_the_release_tag() -> None:
+    workflow = (
+        REPOSITORY_ROOT / ".github" / "workflows" / "publish-packages.yml"
+    ).read_text(encoding="utf-8")
+    assert "types: [published]" in workflow
+    assert "ref: ${{ github.event.release.tag_name }}" in workflow
+    assert "fetch-depth: 0" in workflow
+    assert "pdm build --dest release-dist" in workflow
+    assert "npm ci --ignore-scripts" in workflow
+    assert "npm run build" in workflow
+    assert "npm pack --ignore-scripts --pack-destination release-dist" in workflow
+    assert 'npm publish "./$package" --ignore-scripts --provenance' in workflow
+    assert "pypa/gh-action-pypi-publish@release/v1" in workflow
+    for publisher in ("publish-python", "publish-typescript"):
+        job = workflow.split(f"    {publisher}:\n", 1)[1].split("\n    publish-", 1)[0]
+        assert "needs: build" in job
+        assert "environment: release" in job
+        assert "id-token: write" in job
+    for forbidden in (
+        "workflow_dispatch:", "artifact_run_id", "run-id:", "preflight",
+        "workflow_call:", "uses: ./.github/workflows/", "setup-perfect-doc",
+        "pdm install", "pdm run", "npm run check", "npm run test",
+        "npm run lint", "npm run typecheck", "npm run verify:package",
+    ):
+        assert forbidden not in workflow

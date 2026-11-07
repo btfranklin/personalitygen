@@ -20,8 +20,8 @@
   declaration consumption, and inspects an isolated npm tarball.
 - Python provides one complete local check covering lint, strict typing, tests,
   build artifacts, isolated installation, and its public smoke test.
-- One shared publishing workflow gates both registries on successful Python
-  and TypeScript preflights from the same release tag.
+- Full reusable Python and TypeScript CI gates tag-triggered draft creation;
+  publication builds both packages from that tag before either registry upload.
 - Architecture and quality guidance now live under `docs/`.
 - Score validation and vector math now live in a small internal helper shared by Big Five and ABBF models.
 - Tests cover more of the package contract: trait validation, aggregate scoring, stage sampling, deterministic generation, conflict-style mapping, ABBF vectors, runnable examples, public exports, and documentation/runtime alignment.

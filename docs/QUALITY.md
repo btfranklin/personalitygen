@@ -179,32 +179,34 @@ Before release, verify:
    contains only package metadata, license, README, ESM, declarations, and
    embedded-source JavaScript maps, then bundles for a browser target.
 5. Both package versions match the release tag.
-6. The shared OIDC publishing workflow validates both packages from the
-   explicit release tag and uploads their exact artifacts before either
-   publisher job becomes eligible.
+6. Push the version tag and wait for both complete reusable CI workflows to
+   succeed and create the GitHub draft release before reviewing and publishing it.
 
-## Publication And Recovery
+## Draft Preparation And Publication
 
-Publishing is unified in `.github/workflows/publish-packages.yml`. Publishing a
-GitHub Release runs both preflights and, only after both succeed, sends the
-downloaded preflight artifacts to PyPI and npm. A manual run requires an
-existing tag and exposes independent Python and TypeScript publish booleans;
-leaving both false performs preflight only.
+The supported release path starts with a `v*.*.*` tag push.
+`.github/workflows/create-draft-release.yml` calls the ordinary Python and
+TypeScript CI workflows, including all supported-runtime matrices, documentation,
+lint, typing, tests, examples, package inspections, and isolated consumers. Tagged
+runs also check package versions against the tag. Only after both workflows
+succeed does release-notes-scribe create the actual GitHub draft release.
+
+Wait for those checks and the generated draft, review the draft, then select
+**Publish release**. Creating a draft manually in GitHub does not trigger the tag
+workflows and does not establish that the release passed validation.
+
+Publishing triggers `.github/workflows/publish-packages.yml`. It trusts the
+completed draft preparation and checks out the release tag with full history,
+builds fresh Python and npm archives, and checks their versioned filenames. It
+runs no test, lint, documentation, type-check, or isolated-install suites. npm
+lifecycle scripts are disabled during installation, packing, and publication;
+the explicit build only compiles the package. Both archives must build before
+either Trusted Publisher becomes eligible. Both publishers retain the `release`
+environment and OIDC configuration.
 
 Registry publication cannot be atomic. If one registry fails after the other
-has accepted its artifact, never rebuild, edit, retag, or replace the released
-artifact. Correct only the credential or registry-availability problem, then
-use GitHub's **Re-run failed jobs** on that same workflow run. The retried
-publisher downloads the original successful preflight artifact. A new code
-change requires a new version and tag.
-
-If the publisher workflow itself must be corrected, dispatch the corrected
-workflow with the original tag, the failed registry's publish boolean, and the
-original validated run's ID as `artifact_run_id`. The recovery preflight reruns
-both language suites against the tag and checks both preserved packages again,
-including their versions and isolated consumers.
-It uses the npm verifier from the corrected workflow revision so older tags can
-be recovered. Only successful recovery makes either publisher eligible; publishers
-consume the reverified artifacts uploaded by the current run without rebuilding.
-Both publishers still require the `release` environment and an explicit publish
-boolean for manual runs.
+has accepted its package, correct the credential or registry-availability problem
+and use GitHub's **Re-run failed jobs** on that workflow run. The failed publisher
+can download the same run's already-built package. There is no manual dispatch
+or cross-run artifact recovery path. Code corrections require a new version and
+tag; never edit or move a published tag.

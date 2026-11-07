@@ -1,6 +1,7 @@
 name: TypeScript package
 
 on:
+    workflow_call:
     push:
         branches: ["main"]
     pull_request:
@@ -31,3 +32,8 @@ jobs:
               run: npm ci
             - name: Validate package
               run: npm run check
+            - name: Verify release tag
+              if: github.ref_type == 'tag'
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+              run: npm run verify:release-tag

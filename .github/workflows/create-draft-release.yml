@@ -6,45 +6,29 @@ on:
             - "v*.*.*"
 
 permissions:
-    contents: write
+    contents: read
 
 jobs:
+    python-validation:
+        uses: ./.github/workflows/python-package.yml
+    typescript-validation:
+        uses: ./.github/workflows/typescript-package.yml
+
     draft-release:
+        needs: [python-validation, typescript-validation]
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         steps:
             - uses: actions/checkout@v7
               with:
                   fetch-depth: 0
                   ref: ${{ github.ref }}
-            - uses: ./.github/actions/setup-perfect-doc
-            - name: Set up Python 3.11
-              uses: actions/setup-python@v7
-              with:
-                  python-version: "3.11"
-            - name: Install PDM
-              uses: pdm-project/setup-pdm@v4
-              with:
-                  cache: true
-                  cache-dependency-path: packages/python/pdm.lock
-            - name: Set up Node.js 24
-              uses: actions/setup-node@v7
-              with:
-                  node-version: "24"
-                  cache: npm
-                  cache-dependency-path: packages/typescript/package-lock.json
-            - name: Install dependencies
-              run: |
-                  pdm install -p packages/python --group dev
-                  npm ci --prefix packages/typescript
-            - name: Validate tagged Python package
-              working-directory: packages/python
-              run: pdm run check
-            - name: Validate tagged TypeScript package
-              working-directory: packages/typescript
-              run: npm run check
-            - name: Generate release notes
+            - name: Create draft release with generated notes
               uses: btfranklin/release-notes-scribe@v0
               with:
                   openai_api_key: ${{ secrets.OPENAI_API_KEY }}
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   include_github_generated_notes: "true"
+                  create_release: "true"
+                  draft: "true"
