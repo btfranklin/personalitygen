@@ -112,18 +112,110 @@ jobs:
                   path: packages/typescript/release-dist/*.tgz
                   if-no-files-found: error
 
+    recovery-preflight:
+        if: inputs.artifact_run_id != ''
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+                  ref: ${{ env.RELEASE_TAG }}
+            - uses: ./.github/actions/setup-perfect-doc
+            - name: Download original Python artifacts
+              uses: actions/download-artifact@v8
+              with:
+                  name: python-distributions
+                  path: recovery/python-distributions
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
+                  run-id: ${{ inputs.artifact_run_id }}
+            - name: Download original npm artifact
+              uses: actions/download-artifact@v8
+              with:
+                  name: npm-package
+                  path: recovery/npm-package
+                  github-token: ${{ github.token }}
+                  repository: ${{ github.repository }}
+                  run-id: ${{ inputs.artifact_run_id }}
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v7
+              with:
+                  python-version: "3.11"
+            - name: Install PDM
+              uses: pdm-project/setup-pdm@v4
+              with:
+                  cache: true
+                  cache-dependency-path: packages/python/pdm.lock
+            - name: Install Python dependencies
+              working-directory: packages/python
+              run: pdm install --group dev
+            - name: Validate tagged Python source
+              working-directory: packages/python
+              run: |
+                  pdm run docs-check
+                  pdm run lint
+                  pdm run typecheck
+                  pdm run test
+            - name: Reverify exact Python artifacts and release tag
+              working-directory: packages/python
+              run: |
+                  [[ "$RELEASE_TAG" == v* ]]
+                  pdm run verify-package \
+                      --dist ../../recovery/python-distributions \
+                      --expected-version "${RELEASE_TAG#v}"
+            - name: Set up Node.js 24
+              uses: actions/setup-node@v7
+              with:
+                  node-version: "24"
+                  cache: npm
+                  cache-dependency-path: packages/typescript/package-lock.json
+            - name: Install TypeScript dependencies
+              working-directory: packages/typescript
+              run: npm ci
+            - name: Validate tagged TypeScript source and release tag
+              working-directory: packages/typescript
+              run: |
+                  npm run check:core
+                  npm run verify:release-tag
+            - name: Check out recovery verifier from this workflow revision
+              uses: actions/checkout@v7
+              with:
+                  ref: ${{ github.workflow_sha }}
+                  path: recovery-tools
+                  sparse-checkout: packages/typescript/scripts/verify-package.mjs
+                  sparse-checkout-cone-mode: false
+            - name: Reverify exact npm artifact
+              working-directory: packages/typescript
+              run: |
+                  cp ../../recovery-tools/packages/typescript/scripts/verify-package.mjs scripts/verify-package.mjs
+                  node scripts/verify-package.mjs \
+                      --package "../../recovery/npm-package/personalitygen-${RELEASE_TAG#v}.tgz"
+            - name: Upload reverified Python artifacts
+              uses: actions/upload-artifact@v7
+              with:
+                  name: python-distributions
+                  path: recovery/python-distributions/*
+                  if-no-files-found: error
+            - name: Upload reverified npm artifact
+              uses: actions/upload-artifact@v7
+              with:
+                  name: npm-package
+                  path: recovery/npm-package/*.tgz
+                  if-no-files-found: error
+
     publish-python:
         if: >-
             always() &&
             (github.event_name == 'release' || inputs.publish_python) &&
             (
-              inputs.artifact_run_id != '' ||
               (
                 needs.python-preflight.result == 'success' &&
                 needs.typescript-preflight.result == 'success'
-              )
+              ) ||
+              needs.recovery-preflight.result == 'success'
             )
-        needs: [python-preflight, typescript-preflight]
+        needs: [python-preflight, typescript-preflight, recovery-preflight]
         runs-on: ubuntu-latest
         environment: release
         permissions:
@@ -139,7 +231,7 @@ jobs:
                   path: python-distributions
                   github-token: ${{ github.token }}
                   repository: ${{ github.repository }}
-                  run-id: ${{ inputs.artifact_run_id || github.run_id }}
+                  run-id: ${{ github.run_id }}
             - name: Publish Python artifacts with Trusted Publishing
               uses: pypa/gh-action-pypi-publish@release/v1
               with:
@@ -150,13 +242,13 @@ jobs:
             always() &&
             (github.event_name == 'release' || inputs.publish_typescript) &&
             (
-              inputs.artifact_run_id != '' ||
               (
                 needs.python-preflight.result == 'success' &&
                 needs.typescript-preflight.result == 'success'
-              )
+              ) ||
+              needs.recovery-preflight.result == 'success'
             )
-        needs: [python-preflight, typescript-preflight]
+        needs: [python-preflight, typescript-preflight, recovery-preflight]
         runs-on: ubuntu-latest
         environment: release
         permissions:
@@ -178,7 +270,7 @@ jobs:
                   path: npm-package
                   github-token: ${{ github.token }}
                   repository: ${{ github.repository }}
-                  run-id: ${{ inputs.artifact_run_id || github.run_id }}
+                  run-id: ${{ github.run_id }}
             - name: Publish npm artifact with Trusted Publishing
               run: |
                   package="npm-package/personalitygen-${RELEASE_TAG#v}.tgz"

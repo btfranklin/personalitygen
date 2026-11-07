@@ -26,24 +26,42 @@ function argumentValue(name) {
 
 try {
   const requestedDestination = argumentValue("--pack-destination");
-  const packDestination = requestedDestination ?? temporaryDirectory;
-  mkdirSync(packDestination, { recursive: true });
-  const packOutput = execFileSync(
-    "npm",
-    ["pack", "--json", "--pack-destination", packDestination],
-    { cwd: packageRoot, encoding: "utf8" },
+  const requestedPackage = argumentValue("--package");
+  assert.ok(
+    requestedDestination === undefined || requestedPackage === undefined,
+    "--pack-destination and --package cannot be combined",
   );
-  const packMetadata = parseJson(packOutput);
-  const entries = Array.isArray(packMetadata)
-    ? arrayValue(packMetadata)
-    : Object.values(objectValue(packMetadata));
-  const packed = objectValue(entries[0]);
-  const version = stringValue(packed["version"]);
-  assert.equal(stringValue(packed["name"]), "personalitygen");
+  let packagePath = requestedPackage;
+  if (packagePath === undefined) {
+    const packDestination = requestedDestination ?? temporaryDirectory;
+    mkdirSync(packDestination, { recursive: true });
+    const packOutput = execFileSync(
+      "npm",
+      ["pack", "--json", "--pack-destination", packDestination],
+      { cwd: packageRoot, encoding: "utf8" },
+    );
+    const packMetadata = parseJson(packOutput);
+    const entries = Array.isArray(packMetadata)
+      ? arrayValue(packMetadata)
+      : Object.values(objectValue(packMetadata));
+    const packed = objectValue(entries[0]);
+    packagePath = join(packDestination, stringValue(packed["filename"]));
+  }
+  const metadata = objectValue(
+    parseJson(
+      execFileSync("tar", ["-xOf", packagePath, "package/package.json"], {
+        encoding: "utf8",
+      }),
+    ),
+  );
+  const version = stringValue(metadata["version"]);
+  assert.equal(stringValue(metadata["name"]), "personalitygen");
   assert.equal(version, stringValue(packageMetadata["version"]));
-
   const paths = new Set(
-    arrayValue(packed["files"]).map((file) => stringValue(objectValue(file)["path"])),
+    execFileSync("tar", ["-tzf", packagePath], { encoding: "utf8" })
+      .split("\n")
+      .filter((path) => path.startsWith("package/") && !path.endsWith("/"))
+      .map((path) => path.slice("package/".length)),
   );
   for (const required of [
     "LICENSE",
@@ -70,7 +88,6 @@ try {
     "package contains an unusable declaration map",
   );
 
-  const packagePath = join(packDestination, stringValue(packed["filename"]));
   const consumerDirectory = join(temporaryDirectory, "consumer");
   mkdirSync(consumerDirectory);
   writeFileSync(

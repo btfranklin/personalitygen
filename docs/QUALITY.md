@@ -200,5 +200,11 @@ change requires a new version and tag.
 
 If the publisher workflow itself must be corrected, dispatch the corrected
 workflow with the original tag, the failed registry's publish boolean, and the
-original validated run's ID as `artifact_run_id`. This skips both preflights
-and downloads the preserved artifact from that run rather than rebuilding it.
+original validated run's ID as `artifact_run_id`. The recovery preflight reruns
+both language suites against the tag and checks both preserved packages again,
+including their versions and isolated consumers.
+It uses the npm verifier from the corrected workflow revision so older tags can
+be recovered. Only successful recovery makes either publisher eligible; publishers
+consume the reverified artifacts uploaded by the current run without rebuilding.
+Both publishers still require the `release` environment and an explicit publish
+boolean for manual runs.

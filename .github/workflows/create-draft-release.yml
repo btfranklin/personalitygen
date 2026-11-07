@@ -15,6 +15,33 @@ jobs:
             - uses: actions/checkout@v7
               with:
                   fetch-depth: 0
+                  ref: ${{ github.ref }}
+            - uses: ./.github/actions/setup-perfect-doc
+            - name: Set up Python 3.11
+              uses: actions/setup-python@v7
+              with:
+                  python-version: "3.11"
+            - name: Install PDM
+              uses: pdm-project/setup-pdm@v4
+              with:
+                  cache: true
+                  cache-dependency-path: packages/python/pdm.lock
+            - name: Set up Node.js 24
+              uses: actions/setup-node@v7
+              with:
+                  node-version: "24"
+                  cache: npm
+                  cache-dependency-path: packages/typescript/package-lock.json
+            - name: Install dependencies
+              run: |
+                  pdm install -p packages/python --group dev
+                  npm ci --prefix packages/typescript
+            - name: Validate tagged Python package
+              working-directory: packages/python
+              run: pdm run check
+            - name: Validate tagged TypeScript package
+              working-directory: packages/typescript
+              run: npm run check
             - name: Generate release notes
               uses: btfranklin/release-notes-scribe@v0
               with:
